@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # ASITECH OPS dashboard. Targets: "dev" (Vite dev server) and "build" (static dist/).
 
-FROM node:24.22.2-alpine3.23 AS dev
+FROM node:26.13.0-alpine3.23 AS dev
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
