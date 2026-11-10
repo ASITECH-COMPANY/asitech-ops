@@ -44,8 +44,15 @@ updated with every phase. Report vulnerabilities privately (see
 | Configuration | Production settings refuse to start with a weak `DJANGO_SECRET_KEY` or no DB password; secrets only via environment | `settings/prod.py` |
 | Supply chain | Python dependencies pinned **with hashes** (`--require-hashes`); npm lockfiles; Docker images pinned by version; gitleaks secret scan in CI | `requirements/*.txt`, `.github/workflows/ci.yml` |
 | Containers | Dev ports bound to 127.0.0.1; app images run as non-root | `docker-compose.yml`, Dockerfiles |
+| Agent enrollment *(Phase 2)* | 256-bit single-use tokens, SHA-256 stored, 1 h expiry, throttled endpoint; the key pair is generated on the server and only the public key is sent | `apps/servers/services.py`, `agent/asitech_agent/cli.py` |
+| Agent authentication *(Phase 2)* | Ed25519 signature over a fresh 32-byte nonce per connection (no replay); 10 s auth deadline; strict message validation and size limit; heartbeat flood guard | `apps/servers/consumers.py`, `protocol.py` |
+| Agent revocation *(Phase 2)* | Revoke/delete/re-enroll revokes the key and closes the live socket (4403); stale connections cannot mark a server offline; credentials re-checked on every heartbeat | `apps/servers/services.py` |
+| Agent host *(Phase 2)* | Unprivileged system user, key file 0600 in a 0700 state dir (refused if readable by others), TLS-only (plain HTTP only to loopback), certificate verification always on, systemd sandboxing (no capabilities, read-only system, syscall filter); the enrollment token never appears on a command line | `agent/` |
 
-## The Docker socket (root-equivalent) — design for Phase 2+
+## The Docker socket (root-equivalent) — design for Phase 3+
+
+In Phase 2 the agent only reads the Docker version (`GET /version`), and joining
+the `docker` group is opt-in at installation time.
 
 Anyone who can talk to `/var/run/docker.sock` can mount the host filesystem and
 become root. ASITECH OPS treats it accordingly:

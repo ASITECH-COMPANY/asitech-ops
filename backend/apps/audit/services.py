@@ -61,20 +61,28 @@ def record(
     return entry
 
 
-def _broadcast(entry: AuditLog) -> None:
+def org_event_message(action: str, resource: str) -> dict:
+    """Channel-layer message understood by the dashboard event consumer."""
+    return {"type": "org.event", "action": action, "resource": resource}
+
+
+def notify_organization(organization_id, action: str, resource: str) -> None:
+    """Tell connected dashboards that something changed (best effort, sync callers)."""
     channel_layer = get_channel_layer()
-    if channel_layer is None or entry.organization_id is None:
+    if channel_layer is None:
         return
     try:
         async_to_sync(channel_layer.group_send)(
-            organization_group(entry.organization_id),
-            {
-                "type": "org.event",
-                "audit_id": str(entry.pk),
-                "action": entry.action,
-                "resource": ACTION_RESOURCE.get(entry.action, "organization"),
-            },
+            organization_group(organization_id), org_event_message(action, resource)
         )
     except Exception:
-        # Real-time delivery is best effort; the audit row is already committed.
-        logger.warning("Could not broadcast audit event %s", entry.pk, exc_info=True)
+        # Real-time delivery is best effort; the state change is already committed.
+        logger.warning("Could not notify organization %s of %s", organization_id, action, exc_info=True)
+
+
+def _broadcast(entry: AuditLog) -> None:
+    if entry.organization_id is None:
+        return
+    notify_organization(
+        entry.organization_id, entry.action, ACTION_RESOURCE.get(entry.action, "organization")
+    )

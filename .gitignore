@@ -39,3 +39,6 @@ deployment/.state/
 !.vscode/extensions.json
 .DS_Store
 *.swp
+
+# Agent state when developing locally
+agent/.state/

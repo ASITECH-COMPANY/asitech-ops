@@ -4,6 +4,12 @@ import { api, ApiError } from "../lib/api";
 import type {
   AuditEntry,
   CreatedInvitation,
+  CreatedServer,
+  Enrollment,
+  MetricsRange,
+  Server,
+  ServerMetrics,
+  ServerStatus,
   DashboardSummary,
   Invitation,
   Language,
@@ -22,6 +28,8 @@ export const keys = {
   members: (slug: string) => ["org", slug, "members"] as const,
   invitations: (slug: string) => ["org", slug, "invitations"] as const,
   audit: (slug: string) => ["org", slug, "audit"] as const,
+  servers: (slug: string) => ["org", slug, "servers"] as const,
+  server: (slug: string, id: string) => ["org", slug, "servers", id] as const,
 };
 
 // ---- Session ----------------------------------------------------------------------
@@ -201,4 +209,74 @@ export function useAuditLog(slug: string, filters: { action?: string; page: numb
       }),
     placeholderData: keepPreviousData,
   });
+}
+
+// ---- Servers ---------------------------------------------------------------------------
+
+export function useServers(slug: string, filters: { search: string; status: ServerStatus | ""; page: number }) {
+  return useQuery({
+    queryKey: [...keys.servers(slug), "list", filters],
+    queryFn: () =>
+      api<Paginated<Server>>(`/organizations/${slug}/servers/`, {
+        query: { search: filters.search, status: filters.status, page: filters.page },
+      }),
+    placeholderData: keepPreviousData,
+    // Status changes arrive over the WebSocket; this only refreshes "last seen".
+    refetchInterval: 60_000,
+  });
+}
+
+export function useServer(slug: string, id: string) {
+  return useQuery({
+    queryKey: keys.server(slug, id),
+    queryFn: () => api<Server>(`/organizations/${slug}/servers/${id}/`),
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useServerMetrics(slug: string, id: string, range: MetricsRange) {
+  return useQuery({
+    queryKey: [...keys.server(slug, id), "metrics", range],
+    queryFn: () => api<ServerMetrics>(`/organizations/${slug}/servers/${id}/metrics/`, { query: { range } }),
+    placeholderData: keepPreviousData,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useCreateServer(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { name: string; environment: string; project: string }) =>
+      api<CreatedServer>(`/organizations/${slug}/servers/`, { method: "POST", body }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+export function useUpdateServer(slug: string, id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<{ name: string; environment: string; project: string }>) =>
+      api<Server>(`/organizations/${slug}/servers/${id}/`, { method: "PATCH", body }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+export function useServerAction(slug: string, id: string) {
+  const qc = useQueryClient();
+  const onSuccess = () => invalidateOrg(qc, slug);
+  return {
+    revoke: useMutation({
+      mutationFn: () => api<Server>(`/organizations/${slug}/servers/${id}/revoke/`, { method: "POST" }),
+      onSuccess,
+    }),
+    remove: useMutation({
+      mutationFn: () => api<void>(`/organizations/${slug}/servers/${id}/`, { method: "DELETE" }),
+      onSuccess,
+    }),
+    enrollment: useMutation({
+      mutationFn: () => api<Enrollment>(`/organizations/${slug}/servers/${id}/enrollment/`, { method: "POST" }),
+      onSuccess,
+    }),
+  };
 }

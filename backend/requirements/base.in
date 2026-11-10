@@ -12,3 +12,4 @@ channels>=4.2,<5
 channels-redis>=4.2,<5
 uvicorn[standard]>=0.30,<1
 argon2-cffi>=23
+cryptography>=44  # Ed25519 agent identities (Phase 2), secrets encryption (Phase 3)

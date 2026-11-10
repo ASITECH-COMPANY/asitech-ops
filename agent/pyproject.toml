@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asitech-agent"
+version = "0.1.0"
+description = "ASITECH OPS agent: connects a Linux server to the ASITECH OPS Control Plane"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+readme = "README.md"
+# Exact, hash-checked versions are installed from requirements.txt.
+dependencies = ["websockets>=13", "cryptography>=42"]
+
+[project.scripts]
+asitech-agent = "asitech_agent.cli:main"
+
+[tool.setuptools]
+packages = ["asitech_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S108", "E501"]

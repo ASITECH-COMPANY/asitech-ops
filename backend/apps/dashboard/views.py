@@ -9,12 +9,14 @@ from apps.audit.serializers import AuditLogSerializer
 from apps.organizations.access import OrganizationScopedMixin
 from apps.organizations.models import Invitation, Membership
 from apps.organizations.roles import Perm, Role, has_perm
+from apps.servers.models import Server
 
 DashboardSummary = inline_serializer(
     "DashboardSummary",
     fields={
         "organization": serializers.DictField(),
         "stats": serializers.DictField(child=serializers.IntegerField(allow_null=True)),
+        "servers_by_status": serializers.DictField(child=serializers.IntegerField()),
         "members_by_role": serializers.DictField(child=serializers.IntegerField()),
         "recent_activity": AuditLogSerializer(many=True, allow_null=True),
     },
@@ -24,8 +26,8 @@ DashboardSummary = inline_serializer(
 class DashboardView(OrganizationScopedMixin, APIView):
     """Organization overview. Only real data: counts come from the database.
 
-    Server, application and container counters are added by the phases that
-    introduce those resources (see docs/architecture/roadmap.md).
+    Application and container counters are added by the phases that introduce
+    those resources (see docs/architecture/roadmap.md).
     """
 
     permission_map = {"GET": Perm.ORG_VIEW}
@@ -41,6 +43,14 @@ class DashboardView(OrganizationScopedMixin, APIView):
             .values_list("role", "c")
         )
         members_by_role = {role.value: role_counts.get(role.value, 0) for role in Role}
+        server_counts = dict(
+            Server.objects.filter(organization=org)
+            .order_by()
+            .values_list("status")
+            .annotate(c=Count("pk"))
+            .values_list("status", "c")
+        )
+        servers_by_status = {s.value: server_counts.get(s.value, 0) for s in Server.Status}
         can_manage_invites = has_perm(self.membership.role, Perm.INVITATIONS_MANAGE)
         can_view_audit = has_perm(self.membership.role, Perm.AUDIT_VIEW)
 
@@ -60,6 +70,7 @@ class DashboardView(OrganizationScopedMixin, APIView):
                 },
                 "stats": {
                     "members": sum(members_by_role.values()),
+                    "servers": sum(servers_by_status.values()),
                     "pending_invitations": (
                         Invitation.objects.filter(organization=org).pending().count()
                         if can_manage_invites
@@ -67,6 +78,7 @@ class DashboardView(OrganizationScopedMixin, APIView):
                     ),
                 },
                 "members_by_role": members_by_role,
+                "servers_by_status": servers_by_status,
                 "recent_activity": recent,
             }
         )

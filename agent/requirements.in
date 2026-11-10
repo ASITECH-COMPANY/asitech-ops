@@ -1,0 +1,4 @@
+# Agent runtime dependencies. Compile with:
+#   uv pip compile requirements.in --python-version 3.11 --python-platform linux --generate-hashes -o requirements.txt
+websockets>=13,<18
+cryptography>=42

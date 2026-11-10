@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, CircleDashed, Mail, ShieldCheck, UserCog, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, CircleDashed, Mail, Server, ShieldCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link, useOutletContext } from "react-router";
 
@@ -48,7 +48,7 @@ export function ActivityItem({ entry }: { entry: AuditEntry }) {
 
 const MODULES: { key: MessageKey; phase: string | null }[] = [
   { key: "dashboard.module.organizations", phase: null },
-  { key: "dashboard.module.servers", phase: "Phase 2" },
+  { key: "dashboard.module.servers", phase: null },
   { key: "dashboard.module.deployments", phase: "Phase 3" },
   { key: "dashboard.module.infrastructure", phase: "Phase 4" },
   { key: "dashboard.module.production", phase: "Phase 5" },
@@ -70,18 +70,27 @@ export function DashboardPage() {
       <PageHeader title={t("dashboard.title")} description={t("dashboard.subtitle", { org: org.name })} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label={t("dashboard.members")} value={data.stats.members} icon={<Users className="size-4" />} />
+        <StatCard
+          label={t("dashboard.servers")}
+          value={data.stats.servers}
+          icon={<Server className="size-4" />}
+          hint={t("dashboard.serversDetail", {
+            online: data.servers_by_status.online,
+            offline: data.servers_by_status.offline,
+          })}
+        />
+        <StatCard
+          label={t("dashboard.members")}
+          value={data.stats.members}
+          icon={<Users className="size-4" />}
+          hint={`${t("dashboard.yourRole")} : ${t(`role.${data.organization.role}`)}`}
+        />
         <StatCard
           label={t("dashboard.pendingInvites")}
           value={data.stats.pending_invitations ?? "—"}
           icon={<Mail className="size-4" />}
         />
         <StatCard label={t("dashboard.admins")} value={admins} icon={<ShieldCheck className="size-4" />} />
-        <StatCard
-          label={t("dashboard.yourRole")}
-          value={<span className="text-xl">{t(`role.${data.organization.role}`)}</span>}
-          icon={<UserCog className="size-4" />}
-        />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">

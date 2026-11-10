@@ -17,6 +17,8 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { OrgLayout } from "./pages/OrgLayout";
 import { OrgSettingsPage } from "./pages/OrgSettingsPage";
+import { ServerDetailPage } from "./pages/ServerDetailPage";
+import { ServersPage } from "./pages/ServersPage";
 
 function Root() {
   useAppearance();
@@ -60,7 +62,8 @@ export const routes = [
               { path: "members", element: <MembersPage /> },
               { path: "audit", element: <AuditPage /> },
               { path: "settings", element: <OrgSettingsPage /> },
-              { path: "servers", element: <ComingSoonPage module="servers" /> },
+              { path: "servers", element: <ServersPage /> },
+              { path: "servers/:serverId", element: <ServerDetailPage /> },
               { path: "applications", element: <ComingSoonPage module="applications" /> },
               { path: "deployments", element: <ComingSoonPage module="deployments" /> },
               { path: "monitoring", element: <ComingSoonPage module="monitoring" /> },

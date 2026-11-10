@@ -31,3 +31,18 @@ describe("safeNext", () => {
     expect(safeNext(null)).toBe("/");
   });
 });
+
+describe("formatting", () => {
+  it("formats sizes, rates and percentages", async () => {
+    const { formatBytes, formatPercent, formatRate, percent } = await import("../src/lib/format");
+    expect(formatBytes(0)).toBe("0 B");
+    expect(formatBytes(1536)).toBe("1.5 KB");
+    expect(formatBytes(12_411_666_432)).toBe("11.6 GB");
+    expect(formatBytes(null)).toBe("—");
+    expect(formatRate(2048)).toBe("2 KB/s");
+    expect(percent(1, 4)).toBe(25);
+    expect(percent(1, 0)).toBeNull();
+    expect(formatPercent(41, "en")).toBe("41.0 %");
+    expect(formatPercent(41, "fr")).toMatch(/^41,0\s%$/);
+  });
+});

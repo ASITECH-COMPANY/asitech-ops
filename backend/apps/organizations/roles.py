@@ -28,6 +28,9 @@ class Perm(StrEnum):
     MEMBERS_MANAGE = "members.manage"
     INVITATIONS_MANAGE = "invitations.manage"
     AUDIT_VIEW = "audit.view"
+    SERVERS_VIEW = "servers.view"
+    # Registering or revoking a server grants Docker (root-equivalent) control over it.
+    SERVERS_MANAGE = "servers.manage"
 
 
 _ALL = frozenset(Role)
@@ -41,6 +44,8 @@ ROLE_PERMISSIONS: dict[Perm, frozenset[Role]] = {
     Perm.INVITATIONS_MANAGE: _ADMINS,
     Perm.AUDIT_VIEW: _ADMINS,
     Perm.ORG_DELETE: frozenset({Role.OWNER}),
+    Perm.SERVERS_VIEW: _ALL,
+    Perm.SERVERS_MANAGE: _ADMINS,
 }
 
 

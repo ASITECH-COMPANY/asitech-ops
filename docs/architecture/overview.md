@@ -43,8 +43,9 @@ ASITECH OPS has three independent parts:
   | `organizations` | Tenants, memberships, roles/permissions, invitations |
   | `audit` | Append-only audit log + real-time fan-out |
   | `dashboard` | Aggregated, read-only views for the UI |
-  | `realtime` | WebSocket consumers |
-  | *Phase 2+* `servers`, `agents`, `applications`, `deployments`, `domains`, `backups` | See [roadmap](roadmap.md) |
+  | `realtime` | WebSocket routing, dashboard event stream |
+  | `servers` | Servers, enrollment tokens, agent credentials, metrics, agent WebSocket |
+  | *Phase 3+* `applications`, `deployments`, `domains`, `backups` | See [roadmap](roadmap.md) |
 
 * **Service layer.** Views are thin. Every state change goes through a service
   module (e.g. `apps/organizations/services.py`) that enforces business rules
@@ -71,7 +72,9 @@ from the same origin as the API (Vite proxy in development, reverse proxy in
 production): no CORS, HttpOnly session cookie, CSRF token echoed in
 `X-CSRFToken`. UI text is bilingual (FR/EN) with typed dictionaries.
 
-## Remote Agent (Phase 2 — design)
+## Remote Agent (Phase 2)
+
+Implemented in [`agent/`](../../agent/README.md); protocol details in [api.md](api.md#agent-endpoints).
 
 * Python service managed by systemd, one per server.
 * **Registration:** an administrator creates a server in the dashboard, which
@@ -81,7 +84,7 @@ production): no CORS, HttpOnly session cookie, CSRF token echoed in
 * **Connection:** the agent opens an outbound WebSocket over TLS to the Control
   Plane and authenticates by signing a server-issued challenge. No inbound port
   is opened on managed servers.
-* **Tasks:** the Control Plane sends typed operations only (`deploy`,
+* **Tasks (Phase 3):** the Control Plane will send typed operations only (`deploy`,
   `container.restart`, `logs.stream`...), each with a unique ID, issue time,
   expiry and signature. The agent rejects unknown types, expired or replayed
   task IDs, and parameters that fail its own validation. There is no "run this

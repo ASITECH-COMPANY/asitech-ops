@@ -21,7 +21,7 @@
     },
     {
       "id": "phase-2",
-      "status": "planned",
+      "status": "in-progress",
       "title": { "fr": "Phase 2 — Agent serveur", "en": "Phase 2 — Server agent" },
       "items": {
         "fr": ["Enregistrement sécurisé des serveurs", "Connexion sortante authentifiée", "Métriques et état en ligne / hors ligne"],

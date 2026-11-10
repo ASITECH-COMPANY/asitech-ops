@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.dashboard",
     "apps.realtime",
+    "apps.servers",
 ]
 
 MIDDLEWARE = [
@@ -119,6 +120,14 @@ CELERY_TASK_SOFT_TIME_LIMIT = 240
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_BEAT_SCHEDULE = {
+    "mark-stale-servers-offline": {
+        "task": "apps.servers.tasks.mark_stale_servers_offline",
+        "schedule": 60.0,
+    },
+    "purge-old-metrics": {
+        "task": "apps.servers.tasks.purge_old_metrics",
+        "schedule": 24 * 3600.0,
+    },
     "purge-old-invitations": {
         "task": "apps.organizations.tasks.purge_old_invitations",
         "schedule": 24 * 3600.0,
@@ -195,6 +204,7 @@ REST_FRAMEWORK = {
         "login_email": env_str("THROTTLE_LOGIN_EMAIL", "20/hour"),
         "invitation": env_str("THROTTLE_INVITATION", "20/min"),
         "password": env_str("THROTTLE_PASSWORD", "5/min"),
+        "agent_enroll": env_str("THROTTLE_AGENT_ENROLL", "10/min"),
     },
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -237,6 +247,15 @@ INVITATION_TTL_HOURS = env_int("INVITATION_TTL_HOURS", 72)
 ORGANIZATION_CREATION = env_str("ORGANIZATION_CREATION", "staff")
 if ORGANIZATION_CREATION not in {"staff", "any"}:
     raise ImproperlyConfigured('ORGANIZATION_CREATION must be "staff" or "any".')
+
+# --- Agents (Phase 2) ------------------------------------------------------------------------
+# URL agents use to reach the Control Plane (enrollment + outbound WebSocket).
+AGENT_CONTROL_PLANE_URL = env_str("AGENT_CONTROL_PLANE_URL", PUBLIC_BASE_URL).rstrip("/")
+AGENT_ENROLLMENT_TTL_MINUTES = env_int("AGENT_ENROLLMENT_TTL_MINUTES", 60)
+AGENT_AUTH_TIMEOUT_SECONDS = env_int("AGENT_AUTH_TIMEOUT_SECONDS", 10)
+AGENT_OFFLINE_AFTER_SECONDS = env_int("AGENT_OFFLINE_AFTER_SECONDS", 90)
+METRICS_SAMPLE_INTERVAL_SECONDS = env_int("METRICS_SAMPLE_INTERVAL_SECONDS", 55)
+METRICS_RETENTION_DAYS = env_int("METRICS_RETENTION_DAYS", 7)
 
 # --- Logging (structured JSON on stdout) ----------------------------------------------------
 LOG_LEVEL = env_str("LOG_LEVEL", "INFO")

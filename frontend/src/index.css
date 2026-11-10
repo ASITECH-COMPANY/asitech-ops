@@ -24,6 +24,10 @@
   --warning: #b45309;
   --warning-soft: #fdf3e2;
   --ring: #1d4ed8;
+  /* Chart series, validated with the dataviz palette checks (CVD, contrast, lightness). */
+  --chart-1: #1d4ed8;
+  --chart-2: #ea580c;
+  --chart-grid: #e9ecf1;
   color-scheme: light;
 }
 
@@ -47,6 +51,9 @@
   --warning: #fbbf24;
   --warning-soft: #352a10;
   --ring: #6b91f3;
+  --chart-1: #4f7cf0;
+  --chart-2: #ea580c;
+  --chart-grid: #1f2a40;
   color-scheme: dark;
 }
 

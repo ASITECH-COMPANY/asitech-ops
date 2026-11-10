@@ -17,9 +17,9 @@
   <img alt="Status: early development" src="https://img.shields.io/badge/status-early%20development-F97316">
 </p>
 
-> **Status: early development — not production ready.** Phase 1 (foundation)
-> is in progress: accounts, organizations, roles, invitations, audit log and the
-> dashboard shell work today. Server agents and deployments arrive in Phases 2–3.
+> **Status: early development — not production ready.** Accounts, organizations,
+> roles, invitations, audit log (Phase 1) and the server agent with metrics
+> (Phase 2) work today. Deployments arrive in Phase 3.
 > See the [roadmap](docs/architecture/roadmap.md).
 
 ## What it is
@@ -44,7 +44,7 @@ here is a mock-up of features that do not exist.
 | Immutable audit log, real-time dashboard updates (WebSocket) | ✅ Phase 1 |
 | Bilingual dashboard (FR/EN), light/dark themes | ✅ Phase 1 |
 | OpenAPI documentation | ✅ Phase 1 |
-| Server registration, secure agent, metrics | 🗓 Phase 2 |
+| Server registration, secure agent (Ed25519, outbound TLS), metrics, online/offline | ✅ Phase 2 (being validated on real servers) |
 | Git / Dockerfile / Compose deployments, logs, history, rollback | 🗓 Phase 3 |
 | Containers, images, volumes, networks, live logs, monitoring | 🗓 Phase 4 |
 | Domains & SSL, backups, notifications, VPS installer | 🗓 Phase 5 |
@@ -69,7 +69,7 @@ Details: [overview](docs/architecture/overview.md) ·
 * **Backend:** Python 3.13, Django 5.2 LTS, Django REST Framework, Channels, Celery, PostgreSQL 17, Redis, drf-spectacular
 * **Dashboard:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query, Zustand, Lucide
 * **Website:** static Vite + TypeScript + Tailwind, unprivileged Nginx
-* **Agent (Phase 2):** Python, Docker Engine API, systemd
+* **Agent:** Python 3.10+, websockets, cryptography (Ed25519), systemd — see [agent/README.md](agent/README.md)
 
 ## Quick installation
 

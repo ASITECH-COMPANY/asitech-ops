@@ -82,6 +82,31 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  agent:
+    name: Agent (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ["3.11", "3.13"]
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies (hash-checked) and test tools
+        run: |
+          pip install --require-hashes -r requirements.txt
+          pip install pytest==9.2.0 ruff==0.17.4
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Tests
+        run: python -m pytest -q
+
   images:
     name: Docker images build
     runs-on: ubuntu-24.04
@@ -97,7 +122,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: shellcheck --severity=warning deployment/scripts/*.sh landing/scripts/*.sh
+      - run: shellcheck --severity=warning deployment/scripts/*.sh landing/scripts/*.sh agent/*.sh
 
   secrets:
     name: Secret scan (gitleaks)

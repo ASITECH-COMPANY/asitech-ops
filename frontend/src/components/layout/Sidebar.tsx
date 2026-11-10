@@ -81,7 +81,7 @@ export function Sidebar({ org, onNavigate }: { org?: Organization; onNavigate?: 
               title={t("nav.infrastructure")}
               onNavigate={onNavigate}
               items={[
-                { to: `${base}/servers`, label: "nav.servers", icon: Server, soon: true },
+                { to: `${base}/servers`, label: "nav.servers", icon: Server },
                 { to: `${base}/applications`, label: "nav.applications", icon: AppWindow, soon: true },
                 { to: `${base}/deployments`, label: "nav.deployments", icon: Rocket, soon: true },
                 { to: `${base}/monitoring`, label: "nav.monitoring", icon: Activity, soon: true },

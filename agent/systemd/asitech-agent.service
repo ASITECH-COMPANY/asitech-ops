@@ -1,0 +1,47 @@
+# ASITECH OPS agent — installed by agent/install.sh
+[Unit]
+Description=ASITECH OPS agent
+Documentation=https://github.com/ASITECH-COMPANY/asitech-ops/tree/main/agent
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=asitech-agent
+Group=asitech-agent
+Environment=ASITECH_AGENT_STATE_DIR=/var/lib/asitech-agent
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/asitech-agent/venv/bin/asitech-agent run
+Restart=always
+RestartSec=5
+
+# --- Hardening ----------------------------------------------------------------------------
+# The agent never needs root: no capabilities, read-only system, private /tmp.
+# Note: membership of the "docker" group (Phase 3 deployments) is root-equivalent on
+# this host; see docs/security/architecture.md.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+StateDirectory=asitech-agent
+StateDirectoryMode=0700
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

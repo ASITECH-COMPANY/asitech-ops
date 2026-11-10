@@ -8,6 +8,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **Server agent (Phase 2):** servers with environment/project labels,
+  single-use hashed enrollment tokens, Ed25519 agent identities generated on the
+  server, challenge/response authentication over an outbound WebSocket, signed
+  per-connection nonces (no replay), heartbeats with CPU/memory/disk/network
+  metrics, online/offline detection, revocation and key rotation, metrics
+  retention, dashboard server list, install command, detail page with charts.
+- `agent/`: Python agent (`asitech-agent enroll|run|status|facts`), hardened
+  systemd unit, `install.sh` / `uninstall.sh`, hash-pinned dependencies, tests.
 - Monorepo structure, Apache-2.0 licensing, contribution and security policies, CI.
 - **Control Plane foundation (Phase 1):** Django 5.2 LTS project with split
   settings, PostgreSQL, Redis cache, Celery, Django Channels, structured JSON

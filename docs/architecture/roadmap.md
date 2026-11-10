@@ -25,13 +25,18 @@ keep both in sync.
 - [ ] Password reset by e-mail
 - [ ] Production Compose file + reverse proxy config for the Control Plane (moved to Phase 5 installer work)
 
-## Phase 2 — Server agent
+## Phase 2 — Server agent · *in progress*
 
-- Server model and enrollment tokens; dashboard "Add server" flow with one-time command
-- Agent package (`agent/asitech_agent`): enrollment, Ed25519 identity, outbound WebSocket, heartbeat
-- System facts and metrics (CPU, RAM, disk, network); online/offline detection
-- Revocation; systemd unit with hardening; agent tests
-- Recharts-based metrics views in the dashboard
+- [x] Server model, environment/project labels, hashed single-use enrollment tokens
+- [x] Dashboard "Add server" flow with a one-time install command and live connection status
+- [x] Agent package (`agent/asitech_agent`): enrollment, Ed25519 identity, outbound WebSocket, heartbeat
+- [x] Challenge/response authentication with per-connection nonces (no replay), auth timeout
+- [x] System facts and metrics (CPU, RAM, disk, network); online/offline detection; retention
+- [x] Revocation, deletion and key rotation close the live connection immediately
+- [x] Hardened systemd unit, `install.sh` / `uninstall.sh`, agent tests (unit + protocol + integration)
+- [x] Metrics charts in the dashboard (Recharts), table view
+- [ ] Validate `install.sh` on fresh Ubuntu 22.04 (python3.11) / 24.04 and Debian 12 servers (systemd, docker group)
+- [ ] Packaged agent releases (no repository checkout needed) — with the Phase 5 distribution work
 
 ## Phase 3 — Deployment engine
 

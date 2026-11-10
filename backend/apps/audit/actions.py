@@ -22,6 +22,13 @@ class AuditAction(models.TextChoices):
     INVITATION_REVOKED = "invitation.revoked"
     INVITATION_ACCEPTED = "invitation.accepted"
 
+    SERVER_CREATED = "server.created"
+    SERVER_UPDATED = "server.updated"
+    SERVER_ENROLLMENT_TOKEN_CREATED = "server.enrollment_token_created"  # noqa: S105 (action name)
+    SERVER_ENROLLED = "server.enrolled"
+    SERVER_REVOKED = "server.revoked"
+    SERVER_DELETED = "server.deleted"
+
 
 # Which dashboard resource an action affects. Used by the real-time channel so
 # clients know what to refresh, without leaking audit details to every member.
@@ -35,4 +42,10 @@ ACTION_RESOURCE = {
     AuditAction.INVITATION_CREATED: "invitations",
     AuditAction.INVITATION_REVOKED: "invitations",
     AuditAction.INVITATION_ACCEPTED: "members",
+    AuditAction.SERVER_CREATED: "servers",
+    AuditAction.SERVER_UPDATED: "servers",
+    AuditAction.SERVER_ENROLLMENT_TOKEN_CREATED: "servers",
+    AuditAction.SERVER_ENROLLED: "servers",
+    AuditAction.SERVER_REVOKED: "servers",
+    AuditAction.SERVER_DELETED: "servers",
 }

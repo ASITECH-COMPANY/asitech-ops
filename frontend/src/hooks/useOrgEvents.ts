@@ -12,7 +12,7 @@ const PING_INTERVAL_MS = 25_000;
 interface ServerEvent {
   type: "hello" | "event" | "pong";
   action?: string;
-  resource?: "organization" | "members" | "invitations";
+  resource?: "organization" | "members" | "invitations" | "servers";
 }
 
 /**
@@ -58,6 +58,8 @@ export function useOrgEvents(slug: string): LiveStatus {
           qc.invalidateQueries({ queryKey: keys.invitations(slug) });
         } else if (event.resource === "invitations") {
           qc.invalidateQueries({ queryKey: keys.invitations(slug) });
+        } else if (event.resource === "servers") {
+          qc.invalidateQueries({ queryKey: keys.servers(slug) });
         } else {
           qc.invalidateQueries({ queryKey: keys.organization(slug) });
           qc.invalidateQueries({ queryKey: keys.organizations });

@@ -12,10 +12,12 @@ api_v1 = [
     path("", include("apps.organizations.urls")),
     path("", include("apps.audit.urls")),
     path("", include("apps.dashboard.urls")),
+    path("", include("apps.servers.urls")),
 ]
 
 urlpatterns = [
     path("api/v1/", include(api_v1)),
+    path("api/agent/v1/", include("apps.servers.agent_urls")),
     path("api/schema/", SpectacularAPIView.as_view(permission_classes=_docs_permissions), name="schema"),
     path(
         "api/docs/",

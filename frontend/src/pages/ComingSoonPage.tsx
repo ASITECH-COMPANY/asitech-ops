@@ -1,4 +1,4 @@
-import { Activity, AppWindow, ExternalLink, Rocket, Server, type LucideIcon } from "lucide-react";
+import { Activity, AppWindow, ExternalLink, Rocket, type LucideIcon } from "lucide-react";
 import { useOutletContext } from "react-router";
 
 import { Card } from "../components/ui/Card";
@@ -6,10 +6,9 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useT, type MessageKey } from "../i18n";
 import type { OrgContext } from "./OrgLayout";
 
-export type ModuleName = "servers" | "applications" | "deployments" | "monitoring";
+export type ModuleName = "applications" | "deployments" | "monitoring";
 
 const MODULES: Record<ModuleName, { label: MessageKey; body: MessageKey; phase: string; icon: LucideIcon }> = {
-  servers: { label: "nav.servers", body: "soon.servers", phase: "Phase 2", icon: Server },
   applications: { label: "nav.applications", body: "soon.applications", phase: "Phase 3", icon: AppWindow },
   deployments: { label: "nav.deployments", body: "soon.deployments", phase: "Phase 3", icon: Rocket },
   monitoring: { label: "nav.monitoring", body: "soon.monitoring", phase: "Phase 4", icon: Activity },

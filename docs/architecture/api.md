@@ -98,7 +98,41 @@ proxy or access logs.
 |---|---|---|---|
 | GET | `/organizations/{slug}/audit-logs/?action=&actor=&since=&until=` | `audit.view` | Paginated, newest first |
 
-### WebSocket
+### Servers (Phase 2)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/organizations/{slug}/servers/?search=&status=&environment=` | `servers.view` | Paginated servers with status, facts, last seen |
+| POST | `/organizations/{slug}/servers/` | `servers.manage` | `{name, environment?, project?}` → server + `enrollment` (token, install command, expiry) **once** |
+| GET / PATCH / DELETE | `/organizations/{slug}/servers/{id}/` | view / manage / manage | Details, rename/relabel, delete (also disconnects the agent) |
+| POST | `/organizations/{slug}/servers/{id}/enrollment/` | `servers.manage` | New single-use token (reinstall, key rotation); previous unused tokens stop working |
+| POST | `/organizations/{slug}/servers/{id}/revoke/` | `servers.manage` | Revoke the agent key and close its connection immediately |
+| GET | `/organizations/{slug}/servers/{id}/metrics/?range=1h\|6h\|24h\|7d` | `servers.view` | Time-bucketed CPU, memory, disk, network rates |
+
+### Agent endpoints
+
+These are called by the agent, not by browsers.
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/api/agent/v1/enroll/` | single-use enrollment token, throttled 10/min | `{token, public_key (base64 Ed25519), facts}` → `{server_id, websocket_path, heartbeat_interval, protocol}` |
+| WS | `/ws/agent/v1/connect/` | Ed25519 challenge/response | See the agent protocol below |
+
+Agent protocol v1 (`backend/apps/servers/protocol.py`, mirrored in `agent/asitech_agent/protocol.py`):
+
+```text
+CP → agent  {"type": "challenge", "nonce": "<base64, 32 random bytes>", "protocol": 1}
+agent → CP  {"type": "auth", "server_id": "<uuid>", "signature": base64(Ed25519(
+               "asitech-agent-auth-v1\n" + server_id + "\n" + nonce))}
+CP → agent  {"type": "welcome", "server_id": "<uuid>", "heartbeat_interval": 15}
+agent → CP  {"type": "heartbeat", "metrics": {...}, "facts": {...}}   every interval
+```
+
+Close codes: `4400` malformed message, `4401` authentication failed or no `auth`
+within 10 s, `4403` revoked, deleted or re-enrolled. Heartbeats closer than 5 s
+apart are ignored; metrics are validated strictly and persisted at most once a minute.
+
+### WebSocket (dashboard)
 
 `/ws/v1/organizations/{slug}/events/` — session authenticated, origin checked
 against `ALLOWED_HOSTS`. Messages:
@@ -118,20 +152,16 @@ Close codes: `4401` not signed in, `4403` not (or no longer) a member.
 | `organization.view`, `members.view` | ✓ | ✓ | ✓ | ✓ |
 | `organization.update`, `members.manage`, `invitations.manage`, `audit.view` | ✓ | ✓ | | |
 | `organization.delete` | ✓ | | | |
+| `servers.view` | ✓ | ✓ | ✓ | ✓ |
+| `servers.manage` (add, revoke, delete servers: grants Docker control) | ✓ | ✓ | | |
 
 Admins manage admins, members and viewers; only owners grant, change or remove
 the owner role. The matrix lives in `backend/apps/organizations/roles.py`
 (single source of truth, mirrored in `frontend/src/lib/permissions.ts`).
 
-## Planned contracts (Phases 2–3, subject to review)
+## Planned contracts (Phase 3, subject to review)
 
 ```text
-POST   /organizations/{slug}/servers/                 -> server + one-time enrollment command
-GET    /organizations/{slug}/servers/                 -> list with status, last_seen_at
-DELETE /organizations/{slug}/servers/{id}/            -> revoke agent credentials
-GET    /organizations/{slug}/servers/{id}/metrics/?from=&to=&step=
-POST   /agent/v1/enroll                               -> {enrollment_token, public_key, facts} (agent only)
-WS     /agent/v1/connect                              -> challenge/response, then signed tasks
 POST   /organizations/{slug}/applications/
 POST   /organizations/{slug}/applications/{id}/deployments/   -> trigger
 POST   /organizations/{slug}/deployments/{id}/rollback/
