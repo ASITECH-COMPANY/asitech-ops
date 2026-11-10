@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # --- 2. Serve -------------------------------------------------------------------------
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine3.24
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24
 LABEL org.opencontainers.image.title="asitech-landing" \
       org.opencontainers.image.description="ASITECH OPS public website" \
       org.opencontainers.image.url="https://asitechsolution.cloud" \
