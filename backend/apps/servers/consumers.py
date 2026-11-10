@@ -27,7 +27,7 @@ from django.conf import settings
 
 from apps.core import crypto
 
-from . import protocol, services
+from . import docker_ops, protocol, services
 
 logger = logging.getLogger("asitech.agents")
 
@@ -47,7 +47,8 @@ def update_status(**kwargs):
 CLOSE_BAD_REQUEST = 4400
 CLOSE_UNAUTHORIZED = 4401
 CLOSE_REVOKED = 4403
-MAX_MESSAGE_BYTES = 64 * 1024
+# Inventories and operation results (logs, inspect) can be large.
+MAX_MESSAGE_BYTES = 2 * 1024 * 1024 + 4096
 
 
 class AgentConsumer(AsyncWebsocketConsumer):
@@ -120,6 +121,18 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 step=message.get("step", ""),
                 error=message.get("error", ""),
                 result=message.get("result"),
+            )
+        elif kind == "task.result":
+            await database_sync_to_async(docker_ops.record_result)(
+                server_id=self.server_id,
+                task_id=message.get("task_id"),
+                ok=message.get("ok"),
+                data=message.get("data"),
+                error=message.get("error", ""),
+            )
+        elif kind == "inventory":
+            await database_sync_to_async(docker_ops.save_inventory)(
+                server_id=self.server_id, data=message.get("data")
             )
         elif kind == "ping":
             await self._send({"type": "pong"})

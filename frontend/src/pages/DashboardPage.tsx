@@ -5,11 +5,12 @@ import { Link, useOutletContext } from "react-router";
 import { Badge } from "../components/ui/Badge";
 import { Card, CardHeader, PageHeader } from "../components/ui/Card";
 import { EmptyState, ErrorState, Spinner } from "../components/ui/States";
-import { useDashboard } from "../hooks/queries";
+import { useDashboard, useMonitoring } from "../hooks/queries";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { actionKey, useLanguage, useT, type MessageKey } from "../i18n";
 import { formatRelative } from "../lib/format";
 import type { AuditEntry } from "../lib/types";
+import { AlertRow } from "./MonitoringPage";
 import type { OrgContext } from "./OrgLayout";
 
 function StatCard({ label, value, icon, hint }: { label: string; value: ReactNode; icon: ReactNode; hint?: ReactNode }) {
@@ -50,7 +51,7 @@ const MODULES: { key: MessageKey; phase: string | null }[] = [
   { key: "dashboard.module.organizations", phase: null },
   { key: "dashboard.module.servers", phase: null },
   { key: "dashboard.module.deployments", phase: null },
-  { key: "dashboard.module.infrastructure", phase: "Phase 4" },
+  { key: "dashboard.module.infrastructure", phase: null },
   { key: "dashboard.module.production", phase: "Phase 5" },
 ];
 
@@ -59,6 +60,7 @@ export function DashboardPage() {
   const { org } = useOutletContext<OrgContext>();
   useDocumentTitle(t("dashboard.title"), org.name);
   const { data, error, isPending, refetch } = useDashboard(org.slug);
+  const monitoring = useMonitoring(org.slug);
 
   if (isPending) return <Spinner />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -92,6 +94,25 @@ export function DashboardPage() {
           hint={t("dashboard.deploymentsWeek", { count: data.stats.deployments_last_7d })}
         />
       </div>
+
+      {monitoring.data && monitoring.data.alerts.length > 0 ? (
+        <Card className="mt-6 border-warning/40">
+          <CardHeader
+            title={`${t("dashboard.alerts")} (${monitoring.data.alerts.length})`}
+            actions={
+              <Link to="monitoring" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                {t("dashboard.viewMonitoring")}
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
+            }
+          />
+          <ul className="divide-y divide-line">
+            {monitoring.data.alerts.slice(0, 4).map((alert, index) => (
+              <AlertRow key={index} slug={org.slug} alert={alert} />
+            ))}
+          </ul>
+        </Card>
+      ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">

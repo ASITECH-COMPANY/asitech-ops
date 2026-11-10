@@ -8,10 +8,10 @@ import { isUnauthenticated } from "./lib/api";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage";
 import { AccountPage } from "./pages/AccountPage";
 import { AuditPage } from "./pages/AuditPage";
-import { ComingSoonPage } from "./pages/ComingSoonPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HomeRedirect } from "./pages/HomeRedirect";
 import { LoginPage } from "./pages/LoginPage";
+import { MonitoringPage } from "./pages/MonitoringPage";
 import { MembersPage } from "./pages/MembersPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
@@ -72,7 +72,7 @@ export const routes = [
               { path: "applications/:appId", element: <ApplicationDetailPage /> },
               { path: "deployments", element: <DeploymentsPage /> },
               { path: "deployments/:deploymentId", element: <DeploymentDetailPage /> },
-              { path: "monitoring", element: <ComingSoonPage module="monitoring" /> },
+              { path: "monitoring", element: <MonitoringPage /> },
             ],
           },
         ],

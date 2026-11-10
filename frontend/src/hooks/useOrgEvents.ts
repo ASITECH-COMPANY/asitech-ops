@@ -12,7 +12,14 @@ const PING_INTERVAL_MS = 25_000;
 interface ServerEvent {
   type: "hello" | "event" | "pong";
   action?: string;
-  resource?: "organization" | "members" | "invitations" | "servers" | "applications" | "deployments";
+  resource?:
+    | "organization"
+    | "members"
+    | "invitations"
+    | "servers"
+    | "applications"
+    | "deployments"
+    | "inventory";
 }
 
 /**
@@ -49,6 +56,12 @@ export function useOrgEvents(slug: string): LiveStatus {
           return;
         }
         if (event.type !== "event") return;
+        qc.invalidateQueries({ queryKey: keys.monitoring(slug) });
+        if (event.resource === "inventory") {
+          // Pushed by agents every minute: refresh only what shows it.
+          qc.invalidateQueries({ queryKey: keys.inventory(slug) });
+          return;
+        }
         qc.invalidateQueries({ queryKey: keys.dashboard(slug) });
         qc.invalidateQueries({ queryKey: keys.audit(slug) });
         if (event.resource === "members") {

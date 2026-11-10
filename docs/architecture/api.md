@@ -174,6 +174,23 @@ the owner role. The matrix lives in `backend/apps/organizations/roles.py`
 
 Roles: `applications.manage` = owner, admin; `applications.deploy` = owner, admin, member.
 
+### Infrastructure (Phase 4)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/organizations/{slug}/servers/{id}/inventory/` | `servers.view` | Containers (state, CPU, memory, ports, Compose stack, ASITECH app), images, volumes, networks — pushed by the agent every minute |
+| POST | `/organizations/{slug}/servers/{id}/operations/` | per operation (below) | `{op, target, params}` → `202` operation; poll it |
+| GET | `/organizations/{slug}/servers/{id}/operations/{op_id}/` | same as the operation | `pending` → `succeeded` (with `result`) or `failed`; unanswered after 60 s → `failed` |
+| PUT | `/organizations/{slug}/servers/{id}/container-policy/` | `servers.manage` | `{manage_all_containers}` — allow actions on containers not created by ASITECH OPS (audited) |
+| GET | `/organizations/{slug}/monitoring/` | `servers.view` | Per-server health and alerts: server offline, disk/memory ≥ 90 % (≥ 95 % critical), Docker unavailable, ASITECH container stopped or any container restarting, last deployment failed |
+
+Operations: `inventory.refresh` (`servers.view`), `container.logs` with `{tail ≤ 2000, since}`
+(`applications.deploy`), `container.inspect` (environment values redacted, `servers.manage`),
+`container.start|stop|restart|remove`, `image.remove`, `images.prune` (dangling only),
+`volume.remove`, `network.remove` (`servers.manage`, audited). Unless the server's container
+policy allows it, the agent refuses mutations on containers, volumes, networks and images that
+ASITECH OPS did not create. Docker itself refuses to remove objects in use.
+
 ### Signed tasks (Control Plane → agent)
 
 ```text
@@ -184,7 +201,9 @@ Roles: `applications.manage` = owner, admin; `applications.deploy` = owner, admi
 
 The agent pins the Control Plane public key (`ASITECH_TASK_SIGNING_KEY`), and
 rejects a task whose signature, `server_id`, expiry (5 min) or `id` (persistent
-replay memory) is wrong. Payload actions: `deploy` (from Git, or from an existing
-`image` for rollbacks) and `remove`. The agent reports with
+replay memory) is wrong. Kinds: `deploy` (payload actions `deploy` — from Git, or
+from an existing `image` for rollbacks — and `remove`) and `docker` (the operations
+above, answered with `{"type": "task.result", "task_id", "ok", "data", "error"}`).
+The agent also pushes `{"type": "inventory", "data": {...}}` every minute. The agent reports with
 `{"type": "task.log", "task_id", "lines": [{"stream", "message"}]}` and
 `{"type": "task.status", "task_id", "status": "running|succeeded|failed", "step", "error", "result"}`.

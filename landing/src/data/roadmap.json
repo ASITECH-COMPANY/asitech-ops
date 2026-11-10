@@ -39,7 +39,7 @@
     },
     {
       "id": "phase-4",
-      "status": "planned",
+      "status": "in-progress",
       "title": { "fr": "Phase 4 — Gestion de l'infrastructure", "en": "Phase 4 — Infrastructure management" },
       "items": {
         "fr": ["Conteneurs, images, volumes et réseaux", "Logs en temps réel", "Supervision et historique des métriques"],

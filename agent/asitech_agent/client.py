@@ -19,6 +19,7 @@ from websockets.exceptions import ConnectionClosed, InvalidHandshake, InvalidURI
 from . import __version__, identity, protocol, system
 from .config import AgentConfig, state_dir, websocket_url
 from .deploy import Deployer
+from .docker_ops import REFRESH_AFTER, DockerOps
 from .tasks import ReplayStore, TaskRunner, TaskVerifier
 
 logger = logging.getLogger("asitech_agent")
@@ -27,6 +28,7 @@ USER_AGENT = f"asitech-agent/{__version__}"
 CLOSE_BAD_CREDENTIALS = {4401, 4403}
 MAX_BACKOFF = 60
 REJECTED_BACKOFF = 300
+INVENTORY_INTERVAL = 60
 
 
 class EnrollmentError(RuntimeError):
@@ -73,7 +75,26 @@ class Agent:
         # Task reports survive reconnections: they wait here until a connection is up.
         self.outbox: asyncio.Queue[dict] = asyncio.Queue(maxsize=10_000)
         self.replay = ReplayStore(state_dir() / "tasks.json")
-        self.runner = TaskRunner(self._verifier, Deployer(state_dir()), self._enqueue)
+        self.docker = DockerOps()
+        self.runner = TaskRunner(
+            self._verifier,
+            Deployer(state_dir()),
+            self._enqueue,
+            docker=self.docker,
+            after_docker=self._after_docker,
+        )
+        self.inventory_due = asyncio.Event()
+
+    async def _after_docker(self, op: str) -> None:
+        if op in REFRESH_AFTER:
+            self.inventory_due.set()
+
+    async def _push_inventory(self) -> None:
+        try:
+            data = await self.docker.inventory()
+        except Exception as exc:  # Docker missing or misbehaving: report it rather than crash
+            data = {"docker": "unavailable", "error": str(exc)[:300]}
+        await self._enqueue({"type": "inventory", "data": data})
 
     def _verifier(self) -> TaskVerifier | None:
         if not self.config.control_plane_public_key:
@@ -159,6 +180,7 @@ class Agent:
 
             reader = asyncio.create_task(self._read(ws))
             writer = asyncio.create_task(self._write(ws))
+            inventory = asyncio.create_task(self._inventory_loop())
             stop = asyncio.create_task(self.stopping.wait())
             try:
                 collector = system.MetricsCollector()
@@ -177,6 +199,7 @@ class Agent:
             finally:
                 reader.cancel()
                 writer.cancel()
+                inventory.cancel()
                 stop.cancel()
 
     async def _read(self, ws) -> None:
@@ -189,6 +212,14 @@ class Agent:
                 self.runner.submit(message)
             elif message.get("type") == "error":
                 logger.warning("Control Plane reported: %s", message)
+
+    async def _inventory_loop(self) -> None:
+        """Docker inventory at connection, every minute, and right after a Docker operation."""
+        while True:
+            await self._push_inventory()
+            self.inventory_due.clear()
+            with contextlib.suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(self.inventory_due.wait(), timeout=INVENTORY_INTERVAL)
 
     async def _write(self, ws) -> None:
         while True:

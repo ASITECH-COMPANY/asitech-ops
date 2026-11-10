@@ -44,3 +44,15 @@ def test_openapi_schema_is_valid():
     from django.core.management import call_command
 
     call_command("spectacular", "--validate", "--fail-on-warn", "--file", "/dev/null")
+
+
+def test_channel_layer_socket_timeout_exceeds_blocking_reads():
+    """Regression: redis-py 8 defaults to a 5 s socket timeout, equal to channels_redis's blocking read."""
+    from channels_redis.core import RedisChannelLayer
+    from django.conf import settings as django_settings
+
+    from config.settings import base
+
+    host = base.CHANNEL_LAYERS["default"]["CONFIG"]["hosts"][0]
+    assert host["socket_timeout"] > RedisChannelLayer.brpop_timeout
+    assert host["socket_timeout"] == django_settings.CHANNEL_LAYER_SOCKET_TIMEOUT

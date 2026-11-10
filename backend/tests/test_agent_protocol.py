@@ -288,3 +288,39 @@ def test_task_round_trip_over_the_agent_socket(team):
         assert await database_sync_to_async(final.logs.count)() == 1
 
     async_to_sync(scenario)()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_inventory_and_operation_results_over_the_socket(team):
+    from apps.servers import docker_ops
+    from apps.servers.models import AgentOperation, ServerInventory
+
+    server, key = enroll(team)
+    server_id = str(server.pk)
+
+    async def scenario():
+        client = WebsocketClient(application, PATH)
+        await authenticate(client, server_id, key)
+
+        def request():
+            Server.objects.filter(pk=server_id).update(status="online")
+            return docker_ops.request_operation(
+                Server.objects.get(pk=server_id), op="inventory.refresh", target="", params={}, actor=None
+            )
+
+        operation = await database_sync_to_async(request)()
+        task = await client.receive_json_from(timeout=3)
+        assert task["task"]["kind"] == "docker"
+        await client.send_json_to({"type": "inventory", "data": {"docker": "29.1", "containers": []}})
+        await client.send_json_to(
+            {"type": "task.result", "task_id": str(operation.pk), "ok": True, "data": {}}
+        )
+        await client.send_json_to({"type": "ping"})
+        await client.receive_json_from()
+        await client.disconnect()
+
+        assert await database_sync_to_async(ServerInventory.objects.filter(server_id=server_id).exists)()
+        done = await database_sync_to_async(AgentOperation.objects.get)(pk=operation.pk)
+        assert done.status == "succeeded"
+
+    async_to_sync(scenario)()

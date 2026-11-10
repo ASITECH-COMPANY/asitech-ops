@@ -24,7 +24,7 @@ from apps.core import crypto
 
 logger = logging.getLogger("asitech.agents")
 
-KINDS = {"deploy"}
+KINDS = {"deploy", "docker"}
 
 
 def build_task(*, task_id: str, server_id: str, kind: str, payload: dict, timeout_seconds: int) -> dict:

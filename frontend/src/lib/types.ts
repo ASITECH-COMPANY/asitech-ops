@@ -116,6 +116,7 @@ export interface Server {
   last_seen_at: string | null;
   last_ip: string | null;
   enrolled_at: string | null;
+  manage_all_containers: boolean;
   created_at: string;
 }
 
@@ -234,4 +235,114 @@ export interface DeploymentLogLine {
   ts: string;
   stream: "stdout" | "stderr" | "system";
   message: string;
+}
+
+export interface ContainerItem {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  ports: string;
+  created: string;
+  app_id: string;
+  compose_project: string;
+  compose_service: string;
+  cpu_percent: number | null;
+  memory_percent: number | null;
+  memory_usage: string;
+}
+
+export interface ImageItem {
+  id: string;
+  repository: string;
+  tag: string;
+  size: string;
+  created: string;
+  in_use: boolean;
+}
+
+export interface VolumeItem {
+  name: string;
+  driver: string;
+  compose_project: string;
+  in_use: boolean;
+}
+
+export interface NetworkItem {
+  id: string;
+  name: string;
+  driver: string;
+  scope: string;
+  builtin: boolean;
+}
+
+export interface Inventory {
+  collected_at: string | null;
+  data: {
+    docker: string;
+    error: string;
+    containers: ContainerItem[];
+    images: ImageItem[];
+    volumes: VolumeItem[];
+    networks: NetworkItem[];
+  } | null;
+}
+
+export type OperationName =
+  | "inventory.refresh"
+  | "container.logs"
+  | "container.inspect"
+  | "container.start"
+  | "container.stop"
+  | "container.restart"
+  | "container.remove"
+  | "image.remove"
+  | "images.prune"
+  | "volume.remove"
+  | "network.remove";
+
+export interface Operation {
+  id: string;
+  op: OperationName;
+  target: string;
+  status: "pending" | "succeeded" | "failed";
+  result: Record<string, unknown> | null;
+  error: string;
+  created_at: string;
+  finished_at: string | null;
+}
+
+export type AlertKind =
+  | "server_offline"
+  | "disk_high"
+  | "memory_high"
+  | "docker_unavailable"
+  | "container_down"
+  | "deployment_failed";
+
+export interface MonitoringAlert {
+  severity: "critical" | "warning";
+  kind: AlertKind;
+  server?: { id: string; name: string };
+  application?: { id: string; name: string };
+  params: Record<string, string | number | null>;
+}
+
+export interface ServerHealth {
+  server: { id: string; name: string };
+  status: ServerStatus;
+  last_seen_at: string | null;
+  cpu_percent: number | null;
+  memory_percent: number | null;
+  disk_percent: number | null;
+  containers_running: number | null;
+  containers_total: number | null;
+  docker: string | null;
+}
+
+export interface MonitoringOverview {
+  generated_at: string;
+  alerts: MonitoringAlert[];
+  servers: ServerHealth[];
 }

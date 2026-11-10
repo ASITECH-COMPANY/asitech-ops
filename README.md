@@ -47,7 +47,7 @@ here is a mock-up of features that do not exist.
 | OpenAPI documentation | ✅ Phase 1 |
 | Server registration, secure agent (Ed25519, outbound TLS), metrics, online/offline | ✅ Phase 2 (being validated on real servers) |
 | Git / Dockerfile / Compose deployments, live logs, history, rollback | ✅ Phase 3 (being validated on real servers) |
-| Containers, images, volumes, networks, live logs, monitoring | 🗓 Phase 4 |
+| Containers, images, volumes, networks, container logs, monitoring and alerts | ✅ Phase 4 |
 | Domains & SSL, backups, notifications, VPS installer | 🗓 Phase 5 |
 
 ## Architecture

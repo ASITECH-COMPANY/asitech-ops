@@ -51,10 +51,14 @@ keep both in sync.
 - [ ] Compose: zero-interruption switch-over (Compose replaces containers in place; the previous release is restored on failure)
 - [ ] SSH deploy keys, webhooks (deploy on push), build caches
 
-## Phase 4 — Infrastructure management
+## Phase 4 — Infrastructure management · *in progress*
 
-- Containers (list, start/stop/restart, inspect, logs), images, volumes, networks, Compose stacks
-- Real-time logs; monitoring history and retention
+- [x] Docker inventory pushed by the agent every minute (containers with CPU/memory, images, volumes, networks, Compose stacks)
+- [x] Signed Docker operations: start/stop/restart/remove containers, logs (follow mode), redacted inspect, remove unused images/volumes/networks, prune dangling images
+- [x] Safe default: mutations only on objects created by ASITECH OPS; per-server opt-in for everything else (audited)
+- [x] Monitoring page and dashboard alerts (server offline, disk/memory, Docker unavailable, crashing containers, failed deployments)
+- [ ] Streaming logs over WebSocket (today: refreshed every 3 s)
+- [ ] Per-container metric history, alert notifications (e-mail, webhooks) — with Phase 5 notifications
 
 ## Phase 5 — Production readiness
 

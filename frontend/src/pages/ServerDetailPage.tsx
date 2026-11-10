@@ -2,16 +2,18 @@ import { ArrowLeft, Ban, KeyRound, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 
+import { InventoryPanel, type InventoryTab } from "../components/infra/InventoryPanel";
 import { InstallCommand } from "../components/servers/InstallCommand";
 import { MetricsPanel } from "../components/servers/MetricsPanel";
 import { ServerStatusBadge } from "../components/servers/ServerStatusBadge";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Card, CardHeader } from "../components/ui/Card";
+import { cn } from "../components/ui/cn";
 import { ConfirmDialog, Modal } from "../components/ui/Dialog";
 import { Alert } from "../components/ui/Field";
 import { ErrorState, Spinner } from "../components/ui/States";
-import { useServer, useServerAction } from "../hooks/queries";
+import { useContainerPolicy, useServer, useServerAction } from "../hooks/queries";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLanguage, useT, type MessageKey } from "../i18n";
 import { ApiError } from "../lib/api";
@@ -67,6 +69,8 @@ export function ServerDetailPage() {
   const actions = useServerAction(org.slug, serverId);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [confirm, setConfirm] = useState<"revoke" | "delete" | null>(null);
+  const [tab, setTab] = useState<"overview" | InventoryTab>("overview");
+  const policy = useContainerPolicy(org.slug, serverId);
   useDocumentTitle(server?.name, org.name);
   const canManage = can(org, "servers.manage");
 
@@ -131,12 +135,51 @@ export function ServerDetailPage() {
         </div>
       ) : null}
 
+      <div role="tablist" className="mb-4 flex gap-1 overflow-x-auto border-b border-line">
+        {(["overview", "containers", "images", "volumes", "networks"] as const).map((value) => (
+          <button
+            key={value}
+            role="tab"
+            type="button"
+            aria-selected={tab === value}
+            onClick={() => setTab(value)}
+            className={cn(
+              "-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium",
+              tab === value ? "border-primary text-primary" : "border-transparent text-muted hover:text-fg",
+            )}
+          >
+            {t(`infra.tab.${value}`)}
+          </button>
+        ))}
+      </div>
+
+      {tab !== "overview" ? <InventoryPanel org={org} server={server} tab={tab} /> : null}
+
+      {tab === "overview" ? (
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <MetricsPanel slug={org.slug} serverId={server.id} />
         <Facts server={server} />
       </div>
+      ) : null}
 
-      {canManage ? (
+      {tab === "overview" && canManage ? (
+        <Card className="mt-6">
+          <CardHeader title={t("infra.policyTitle")} />
+          <div className="space-y-3 p-5">
+            <p className="text-sm text-muted">{t("infra.policyHelp")}</p>
+            {server.manage_all_containers ? <Alert tone="info">{t("infra.policyEnabled")}</Alert> : null}
+            <Button
+              variant="secondary"
+              loading={policy.isPending}
+              onClick={() => policy.mutate(!server.manage_all_containers)}
+            >
+              {server.manage_all_containers ? t("infra.policyOff") : t("infra.policyOn")}
+            </Button>
+          </div>
+        </Card>
+      ) : null}
+
+      {tab === "overview" && canManage ? (
         <Card className="mt-6 border-danger/40">
           <CardHeader title={<span className="text-danger">{t("servers.dangerZone")}</span>} />
           <div className="flex flex-wrap items-center justify-between gap-4 p-5">

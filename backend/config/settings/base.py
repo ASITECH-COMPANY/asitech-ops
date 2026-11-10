@@ -105,10 +105,16 @@ CACHES = {
     }
 }
 
+# channels_redis blocks up to 5 s on BZPOPMIN; redis-py 8 defaults to a 5 s socket timeout,
+# which races it and drops WebSocket consumers. The socket timeout must be larger.
+CHANNEL_LAYER_SOCKET_TIMEOUT = 20
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [REDIS_URL], "prefix": "asitech:channels"},
+        "CONFIG": {
+            "hosts": [{"address": REDIS_URL, "socket_timeout": CHANNEL_LAYER_SOCKET_TIMEOUT}],
+            "prefix": "asitech:channels",
+        },
     }
 }
 

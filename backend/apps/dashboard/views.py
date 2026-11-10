@@ -15,6 +15,8 @@ from apps.organizations.models import Invitation, Membership
 from apps.organizations.roles import Perm, Role, has_perm
 from apps.servers.models import Server
 
+from . import monitoring
+
 DashboardSummary = inline_serializer(
     "DashboardSummary",
     fields={
@@ -90,3 +92,23 @@ class DashboardView(OrganizationScopedMixin, APIView):
                 "recent_activity": recent,
             }
         )
+
+
+class MonitoringView(OrganizationScopedMixin, APIView):
+    """Health of every server and alerts (offline, disk/memory, containers, failed deployments)."""
+
+    permission_map = {"GET": Perm.SERVERS_VIEW}
+
+    @extend_schema(
+        tags=["dashboard"],
+        responses=inline_serializer(
+            "MonitoringOverview",
+            fields={
+                "generated_at": serializers.DateTimeField(),
+                "alerts": serializers.ListField(child=serializers.DictField()),
+                "servers": serializers.ListField(child=serializers.DictField()),
+            },
+        ),
+    )
+    def get(self, request, org_slug):
+        return Response(monitoring.overview(self.organization))

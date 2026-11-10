@@ -67,6 +67,11 @@ opt-in at installation and required for deployments (Phase 3). Implemented contr
 * **Compose policy:** privileged mode, host namespaces, extra capabilities, host
   devices, unconfined security profiles, Docker socket mounts and bind mounts
   outside the repository are refused before anything is built.
+* **Docker operations (Phase 4):** signed like deployments; container, image,
+  volume and network mutations are refused by the agent for objects ASITECH OPS
+  did not create, unless an administrator enables it for that server (audited).
+  `inspect` results never include environment values. Logs require the
+  `applications.deploy` permission (members and above).
 * **Secrets:** environment variables and repository tokens are encrypted at rest
   (Fernet, `ASITECH_SECRETS_KEY`), never returned by the API, passed to Git and
   Docker through the environment (never on a command line), and masked in logs.

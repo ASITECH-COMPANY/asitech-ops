@@ -4,7 +4,7 @@ from django.db.models import Avg, DateTimeField, F, Func, Max, Q, Value
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, status
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,15 +13,19 @@ from apps.core import crypto
 from apps.core.request import client_ip
 from apps.organizations.access import OrganizationScopedMixin
 from apps.organizations.models import hash_token
-from apps.organizations.roles import Perm
+from apps.organizations.roles import Perm, has_perm
 
-from . import protocol, services
-from .models import EnrollmentToken, MetricSample, Server
+from . import docker_ops, protocol, services
+from .models import AgentOperation, EnrollmentToken, MetricSample, Server, ServerInventory
 from .serializers import (
     AgentEnrolledSerializer,
     AgentEnrollSerializer,
+    ContainerPolicySerializer,
     EnrollmentSerializer,
+    InventorySerializer,
     MetricsSerializer,
+    OperationRequestSerializer,
+    OperationSerializer,
     ServerCreatedSerializer,
     ServerSerializer,
     ServerWriteSerializer,
@@ -226,3 +230,81 @@ class AgentEnrollView(APIView):
             "control_plane_public_key": crypto.task_public_key_b64(),
         }
         return Response(AgentEnrolledSerializer(body).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=["infrastructure"])
+class ServerInventoryView(_ServerMixin, APIView):
+    """Latest containers, images, volumes and networks reported by the agent."""
+
+    permission_map = {"GET": Perm.SERVERS_VIEW}
+
+    @extend_schema(responses=InventorySerializer)
+    def get(self, request, org_slug, server_id):
+        server = self.get_server(server_id)
+        inventory = ServerInventory.objects.filter(server=server).first()
+        body = (
+            {"collected_at": inventory.collected_at, "data": inventory.data}
+            if inventory
+            else {
+                "collected_at": None,
+                "data": None,
+            }
+        )
+        return Response(InventorySerializer(body).data)
+
+
+@extend_schema(tags=["infrastructure"])
+class ServerOperationsView(_ServerMixin, APIView):
+    """Request a Docker operation; poll its result with the returned id."""
+
+    permission_map = {"POST": Perm.SERVERS_VIEW}  # refined per operation below
+
+    @extend_schema(request=OperationRequestSerializer, responses={202: OperationSerializer})
+    def post(self, request, org_slug, server_id):
+        serializer = OperationRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        op = serializer.validated_data["op"]
+        if not has_perm(self.membership.role, docker_ops.OPS[op].permission):
+            raise PermissionDenied("Your role in this organization does not allow this action.")
+        operation = docker_ops.request_operation(
+            self.get_server(server_id),
+            op=op,
+            target=serializer.validated_data["target"],
+            params=serializer.validated_data["params"],
+            actor=request.user,
+            request=request,
+        )
+        return Response(OperationSerializer(operation).data, status=status.HTTP_202_ACCEPTED)
+
+
+@extend_schema(tags=["infrastructure"])
+class ServerOperationDetailView(_ServerMixin, APIView):
+    permission_map = {"GET": Perm.SERVERS_VIEW}
+
+    @extend_schema(responses=OperationSerializer)
+    def get(self, request, org_slug, server_id, operation_id):
+        operation = AgentOperation.objects.filter(server=self.get_server(server_id), pk=operation_id).first()
+        if operation is None:
+            raise NotFound()
+        spec = docker_ops.OPS.get(operation.op)
+        if spec is None or not has_perm(self.membership.role, spec.permission):
+            raise NotFound()
+        return Response(OperationSerializer(docker_ops.refresh_status(operation)).data)
+
+
+@extend_schema(tags=["infrastructure"])
+class ServerContainerPolicyView(_ServerMixin, APIView):
+    """Allow (or not) Docker actions on containers that ASITECH OPS did not create."""
+
+    permission_map = {"PUT": Perm.SERVERS_MANAGE}
+
+    @extend_schema(request=ContainerPolicySerializer, responses=ServerSerializer)
+    def put(self, request, org_slug, server_id):
+        serializer = ContainerPolicySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        server = docker_ops.set_container_policy(
+            self.get_server(server_id),
+            manage_all=serializer.validated_data["manage_all_containers"],
+            request=request,
+        )
+        return Response(ServerSerializer(server).data)

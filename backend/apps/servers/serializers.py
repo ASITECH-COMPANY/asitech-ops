@@ -2,6 +2,7 @@ import re
 
 from rest_framework import serializers
 
+from .docker_ops import OPS
 from .models import Server
 
 LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._-]*$")
@@ -27,6 +28,7 @@ class ServerSerializer(serializers.ModelSerializer):
             "last_seen_at",
             "last_ip",
             "enrolled_at",
+            "manage_all_containers",
             "created_at",
         ]
         read_only_fields = fields
@@ -99,3 +101,29 @@ class MetricsSerializer(serializers.Serializer):
     range = serializers.CharField()
     step_seconds = serializers.IntegerField()
     points = MetricPointSerializer(many=True)
+
+
+class InventorySerializer(serializers.Serializer):
+    collected_at = serializers.DateTimeField(allow_null=True)
+    data = serializers.DictField(allow_null=True)
+
+
+class OperationRequestSerializer(serializers.Serializer):
+    op = serializers.ChoiceField(choices=sorted(OPS))
+    target = serializers.CharField(max_length=255, required=False, allow_blank=True, default="")
+    params = serializers.DictField(required=False, default=dict)
+
+
+class OperationSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    op = serializers.CharField()
+    target = serializers.CharField()
+    status = serializers.CharField()
+    result = serializers.JSONField(allow_null=True)
+    error = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    finished_at = serializers.DateTimeField(allow_null=True)
+
+
+class ContainerPolicySerializer(serializers.Serializer):
+    manage_all_containers = serializers.BooleanField()

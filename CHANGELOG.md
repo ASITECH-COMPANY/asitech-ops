@@ -6,8 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- WebSocket consumers were dropped every few seconds: redis-py 8 defaults to a
+  5 s socket timeout, equal to channels_redis's blocking read. The channel layer
+  now uses a 20 s socket timeout.
+
 ### Added
 
+- **Infrastructure management (Phase 4):** Docker inventory per server,
+  signed container/image/volume/network operations with a "managed objects
+  only" default, container logs with follow mode, redacted inspect, monitoring
+  page and dashboard alerts.
 - **Deployment engine (Phase 3):** applications from Git (Dockerfile or
   Compose), encrypted environment variables and access tokens, signed and
   single-use agent tasks, candidate container + health check before the

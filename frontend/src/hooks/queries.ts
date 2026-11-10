@@ -2,6 +2,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import { api, ApiError } from "../lib/api";
 import type {
+  Inventory,
+  MonitoringOverview,
+  Operation,
+  OperationName,
   Application,
   ApplicationInput,
   AuditEntry,
@@ -36,6 +40,8 @@ export const keys = {
   servers: (slug: string) => ["org", slug, "servers"] as const,
   applications: (slug: string) => ["org", slug, "applications"] as const,
   deployments: (slug: string) => ["org", slug, "deployments"] as const,
+  inventory: (slug: string) => ["org", slug, "inventory"] as const,
+  monitoring: (slug: string) => ["org", slug, "monitoring"] as const,
   server: (slug: string, id: string) => ["org", slug, "servers", id] as const,
 };
 
@@ -394,6 +400,71 @@ export function useRollback(slug: string) {
   return useMutation({
     mutationFn: (deploymentId: string) =>
       api<Deployment>(`/organizations/${slug}/deployments/${deploymentId}/rollback/`, { method: "POST" }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+// ---- Infrastructure (Phase 4) ---------------------------------------------------------------
+
+export function useInventory(slug: string, serverId: string) {
+  return useQuery({
+    queryKey: [...keys.inventory(slug), serverId],
+    queryFn: () => api<Inventory>(`/organizations/${slug}/servers/${serverId}/inventory/`),
+    // The agent pushes a fresh inventory every minute (WebSocket event); this is a fallback.
+    refetchInterval: 90_000,
+  });
+}
+
+export function useMonitoring(slug: string) {
+  return useQuery({
+    queryKey: keys.monitoring(slug),
+    queryFn: () => api<MonitoringOverview>(`/organizations/${slug}/monitoring/`),
+    refetchInterval: 60_000,
+  });
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Request a Docker operation and wait for the agent's answer (polling, ~65 s max). */
+export async function runOperation(
+  slug: string,
+  serverId: string,
+  op: OperationName,
+  target = "",
+  params: Record<string, unknown> = {},
+): Promise<Operation> {
+  const base = `/organizations/${slug}/servers/${serverId}/operations/`;
+  let operation = await api<Operation>(base, { method: "POST", body: { op, target, params } });
+  for (let attempt = 0; operation.status === "pending" && attempt < 130; attempt += 1) {
+    await sleep(attempt < 10 ? 300 : 1000);
+    operation = await api<Operation>(`${base}${operation.id}/`);
+  }
+  if (operation.status !== "succeeded") {
+    throw new ApiError(502, "operation_failed", operation.error || "The operation failed.");
+  }
+  return operation;
+}
+
+export function useOperation(slug: string, serverId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ op, target, params }: { op: OperationName; target?: string; params?: Record<string, unknown> }) =>
+      runOperation(slug, serverId, op, target, params),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.inventory(slug) });
+      qc.invalidateQueries({ queryKey: keys.monitoring(slug) });
+    },
+  });
+}
+
+export function useContainerPolicy(slug: string, serverId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (manage_all_containers: boolean) =>
+      api<Server>(`/organizations/${slug}/servers/${serverId}/container-policy/`, {
+        method: "PUT",
+        body: { manage_all_containers },
+      }),
     onSuccess: () => invalidateOrg(qc, slug),
   });
 }

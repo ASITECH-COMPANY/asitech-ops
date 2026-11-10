@@ -1,4 +1,5 @@
 import secrets
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -32,6 +33,9 @@ class Server(TimeStampedModel):
     # server offline after the agent has already reconnected elsewhere.
     connection_id = models.CharField(max_length=128, blank=True, editable=False)
     enrolled_at = models.DateTimeField(null=True, blank=True)
+    # Docker actions are limited to containers created by ASITECH OPS unless an
+    # administrator explicitly allows managing every container on this server.
+    manage_all_containers = models.BooleanField(default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -117,3 +121,46 @@ class MetricSample(models.Model):
 
     def __str__(self) -> str:
         return f"{self.server} @ {self.ts:%Y-%m-%d %H:%M}"
+
+
+class ServerInventory(models.Model):
+    """Latest Docker inventory reported by the agent (containers, images, volumes, networks)."""
+
+    server = models.OneToOneField(
+        Server, on_delete=models.CASCADE, related_name="inventory", primary_key=True
+    )
+    data = models.JSONField(default=dict)
+    collected_at = models.DateTimeField()
+
+    def __str__(self) -> str:
+        return f"Inventory of {self.server}"
+
+
+class AgentOperation(models.Model):
+    """A Docker operation requested from the dashboard and executed by the agent."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending"
+        SUCCEEDED = "succeeded"
+        FAILED = "failed"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name="operations")
+    op = models.CharField(max_length=32)
+    target = models.CharField(max_length=255, blank=True)
+    params = models.JSONField(default=dict, blank=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    result = models.JSONField(null=True, blank=True)
+    error = models.TextField(blank=True)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.op} {self.target} on {self.server}"

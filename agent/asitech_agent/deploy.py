@@ -52,6 +52,7 @@ class CommandRunner:
         timeout: float = 600,
         check: bool = True,
         quiet: bool = False,
+        max_lines: int = 200,
     ) -> CommandResult:
         process = await asyncio.create_subprocess_exec(
             *args,
@@ -79,7 +80,7 @@ class CommandRunner:
                 process.kill()
             await process.wait()
             raise
-        result = CommandResult(process.returncode or 0, "\n".join(lines[-200:]))
+        result = CommandResult(process.returncode or 0, "\n".join(lines[-max_lines:]))
         if check and result.code != 0:
             # The last output line usually says why (e.g. "fatal: Remote branch main not found").
             reason = next((line.strip() for line in reversed(lines) if line.strip()), "")

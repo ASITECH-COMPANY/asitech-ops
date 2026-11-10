@@ -36,6 +36,9 @@ class AuditAction(models.TextChoices):
     DEPLOYMENT_STARTED = "deployment.started"
     DEPLOYMENT_ROLLBACK = "deployment.rollback"
 
+    DOCKER_ACTION = "docker.action"
+    SERVER_CONTAINER_POLICY = "server.container_policy"
+
 
 # Which dashboard resource an action affects. Used by the real-time channel so
 # clients know what to refresh, without leaking audit details to every member.
@@ -61,4 +64,6 @@ ACTION_RESOURCE = {
     AuditAction.APPLICATION_ENV_UPDATED: "applications",
     AuditAction.DEPLOYMENT_STARTED: "deployments",
     AuditAction.DEPLOYMENT_ROLLBACK: "deployments",
+    AuditAction.DOCKER_ACTION: "servers",
+    AuditAction.SERVER_CONTAINER_POLICY: "servers",
 }

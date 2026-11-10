@@ -84,7 +84,7 @@ export function Sidebar({ org, onNavigate }: { org?: Organization; onNavigate?: 
                 { to: `${base}/servers`, label: "nav.servers", icon: Server },
                 { to: `${base}/applications`, label: "nav.applications", icon: AppWindow },
                 { to: `${base}/deployments`, label: "nav.deployments", icon: Rocket },
-                { to: `${base}/monitoring`, label: "nav.monitoring", icon: Activity, soon: true },
+                { to: `${base}/monitoring`, label: "nav.monitoring", icon: Activity },
               ]}
             />
             <Section

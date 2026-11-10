@@ -24,7 +24,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 logger = logging.getLogger("asitech_agent")
 
 TASK_CONTEXT = b"asitech-task-v1"
-KINDS = {"deploy"}
+KINDS = {"deploy", "docker"}
 MAX_CLOCK_SKEW = timedelta(minutes=5)
 REPLAY_MEMORY = 1000
 
@@ -151,11 +151,21 @@ class Reporter:
 class TaskRunner:
     """Runs verified tasks one at a time."""
 
-    def __init__(self, verifier_factory: Callable[[], TaskVerifier | None], executor, send: Send) -> None:
+    def __init__(
+        self,
+        verifier_factory: Callable[[], TaskVerifier | None],
+        executor,
+        send: Send,
+        docker=None,
+        after_docker: Callable[[str], Awaitable[None]] | None = None,
+    ) -> None:
         self.verifier_factory = verifier_factory
         self.executor = executor
         self.send = send
-        self.lock = asyncio.Lock()
+        self.docker = docker
+        self.after_docker = after_docker
+        self.lock = asyncio.Lock()  # one deployment at a time
+        self.docker_slots = asyncio.Semaphore(4)  # short operations run alongside deployments
         self.tasks: set[asyncio.Task] = set()
 
     def submit(self, message: dict) -> None:
@@ -189,6 +199,9 @@ class TaskRunner:
         task.add_done_callback(self.tasks.discard)
 
     async def _run(self, task: dict) -> None:
+        if task["kind"] == "docker":
+            await self._run_docker(task)
+            return
         payload = task["payload"]
         secrets = list(
             (payload.get("run") or {}).get("env", {}).get(k, "") for k in payload.get("secret_env_keys", [])
@@ -210,3 +223,21 @@ class TaskRunner:
                 await reporter.status("failed", error=str(exc) or exc.__class__.__name__)
             else:
                 await reporter.status("succeeded", "done", result=result)
+
+    async def _run_docker(self, task: dict) -> None:
+        message = {"type": "task.result", "task_id": task["id"]}
+        async with self.docker_slots:
+            try:
+                if self.docker is None:
+                    raise RuntimeError("Docker operations are not available on this agent")
+                data = await asyncio.wait_for(
+                    self.docker.run(task["payload"]), timeout=task["timeout_seconds"]
+                )
+                message.update(ok=True, data=data)
+            except TimeoutError:
+                message.update(ok=False, error=f"Timed out after {task['timeout_seconds']} s.")
+            except Exception as exc:  # reported to the dashboard, not fatal for the agent
+                message.update(ok=False, error=str(exc) or exc.__class__.__name__)
+        await self.send(message)
+        if self.after_docker is not None:
+            await self.after_docker(task["payload"].get("op", ""))

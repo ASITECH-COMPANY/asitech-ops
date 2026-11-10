@@ -46,3 +46,26 @@ describe("formatting", () => {
     expect(formatPercent(41, "fr")).toMatch(/^41,0\s%$/);
   });
 });
+
+describe("monitoring alerts", () => {
+  it("renders localized alert messages", async () => {
+    const { translate } = await import("../src/i18n");
+    const { alertText } = await import("../src/pages/MonitoringPage");
+    const t = (key: Parameters<typeof translate>[1], params?: Record<string, string | number>) =>
+      translate("fr", key, params);
+    const text = alertText(t, "fr", {
+      severity: "warning",
+      kind: "disk_high",
+      server: { id: "1", name: "web-01" },
+      params: { percent: 90.1 },
+    });
+    expect(text).toBe("Le disque de web-01 est plein à 90,1 %.");
+    const down = alertText(t, "fr", {
+      severity: "warning",
+      kind: "container_down",
+      server: { id: "1", name: "web-01" },
+      params: { container: "api", state: "restarting" },
+    });
+    expect(down).toBe("Le conteneur api sur web-01 est en redémarrage.");
+  });
+});
