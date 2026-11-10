@@ -11,3 +11,15 @@ description = "Backend test fixture passwords (not secrets)"
 condition = "AND"
 paths = ['''^backend/tests/.*\.py$''']
 regexes = ['''^correct-horse-battery-staple-42$''', '''^a-Strong-passphrase-2026$''']
+
+[[allowlists]]
+description = "Fake repository token used by agent tests (not a secret)"
+condition = "AND"
+paths = ['''^agent/tests/.*\.py$''']
+regexes = ['''^ghs_Secret987$''']
+
+[[allowlists]]
+description = "Fixed CI-only keys committed once in dc1bd36; CI now generates keys at run time"
+condition = "AND"
+paths = ['''^\.github/workflows/ci\.yml$''']
+regexes = ['''^Y2ktb25seS1zZWNyZXRzLWtleS0zMi1ieXRlcyEhISE=$''', '''^Y2ktb25seS10YXNrLXNpZ25pbmcta2V5LTMyLWJ5dGU=$''']

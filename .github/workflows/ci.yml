@@ -57,11 +57,15 @@ jobs:
       - name: Production settings check
         env:
           DJANGO_SETTINGS_MODULE: config.settings.prod
-          DJANGO_SECRET_KEY: ci-only-0123456789-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJ
           DJANGO_ALLOWED_HOSTS: ops.example.com
-          ASITECH_SECRETS_KEY: Y2ktb25seS1zZWNyZXRzLWtleS0zMi1ieXRlcyEhISE=
-          ASITECH_TASK_SIGNING_KEY: Y2ktb25seS10YXNrLXNpZ25pbmcta2V5LTMyLWJ5dGU=
-        run: python manage.py check --deploy
+        run: |
+          # Throwaway random keys, generated for this run only.
+          key() { python -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())'; }
+          DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')"
+          ASITECH_SECRETS_KEY="$(key)"
+          ASITECH_TASK_SIGNING_KEY="$(key)"
+          export DJANGO_SECRET_KEY ASITECH_SECRETS_KEY ASITECH_TASK_SIGNING_KEY
+          python manage.py check --deploy
       - name: Tests
         run: pytest --cov --cov-report=term-missing:skip-covered
 

@@ -100,7 +100,7 @@ def payload(number=2, **overrides):
         "source": {
             "repo_url": "https://github.com/example/shop.git",
             "branch": "main",
-            "token": "ghs_Secret987",
+            "token": "ghs_Secret987",  # gitleaks:allow
         },
         "build": {"type": "dockerfile", "dockerfile": "Dockerfile", "context": "."},
         "run": {
