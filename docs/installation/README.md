@@ -1,9 +1,11 @@
 # Installation
 
-> **Not available yet.** The production installer (`installer/install.sh` and
-> the `get.asitechsolution.cloud` endpoint) is Phase 5 work. To try ASITECH OPS
-> today, use the [development setup](../development/setup.md). This page
-> records the installer's design so it can be reviewed early.
+> **One-command installer not available yet.** The production installer
+> (`installer/install.sh` and the `get.asitechsolution.cloud` endpoint) is Phase 5
+> work. Today you can deploy the Control Plane on an existing server with
+> [`deploy-control-plane.sh`](control-plane.md), or try it locally with the
+> [development setup](../development/setup.md). This page records the
+> installer's design so it can be reviewed early.
 
 ## Supported systems (target)
 

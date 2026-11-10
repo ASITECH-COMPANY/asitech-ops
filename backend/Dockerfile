@@ -24,7 +24,8 @@ RUN pip install --require-hashes -r requirements/base.txt
 COPY --chown=app:app . .
 # collectstatic only needs a syntactically valid key; the real one is injected at runtime.
 RUN DJANGO_SETTINGS_MODULE=config.settings.base DJANGO_SECRET_KEY=collectstatic-only \
-    python manage.py collectstatic --noinput
+    python manage.py collectstatic --noinput \
+ && chown -R app:app /app/staticfiles
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod \
     WEB_CONCURRENCY=2
 USER app
