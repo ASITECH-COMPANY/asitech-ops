@@ -124,8 +124,8 @@ done <landing/.env
   die "LANDING_DOMAIN '$LANDING_DOMAIN' is not a valid lowercase domain name."
 [[ "$LANDING_PORT" =~ ^[0-9]+$ ]] && ((LANDING_PORT >= 1024 && LANDING_PORT <= 65535)) ||
   die "LANDING_PORT '$LANDING_PORT' must be a number between 1024 and 65535."
-if [[ ! "$LETSENCRYPT_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]]; then
-  warn "LETSENCRYPT_EMAIL is not set to a valid address; certificate issuance will be skipped."
+if [[ -n "$LETSENCRYPT_EMAIL" && ! "$LETSENCRYPT_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]]; then
+  warn "LETSENCRYPT_EMAIL is not a valid address; it is ignored."
   LETSENCRYPT_EMAIL=""
 fi
 ok "domain=$LANDING_DOMAIN port=127.0.0.1:$LANDING_PORT"
@@ -419,15 +419,16 @@ else
     step "TLS certificate"
     if ! command -v certbot >/dev/null; then
       warn "certbot is not installed (sudo apt install certbot). Then re-run this script."
-    elif [[ -z "$LETSENCRYPT_EMAIL" ]]; then
-      warn "Set LETSENCRYPT_EMAIL in landing/.env, then re-run this script."
+    elif [[ -z "$LETSENCRYPT_EMAIL" ]] && ! as_root sh -c 'ls -d /etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory/* >/dev/null 2>&1'; then
+      warn "No Let's Encrypt account on this host: set LETSENCRYPT_EMAIL in landing/.env, then re-run this script."
     elif ! as_root test -f "$VHOST_PATH"; then
       warn "Install the vhost first (it serves the ACME challenge)."
     else
       certbot_cmd=(certbot certonly --webroot -w "$ACME_WEBROOT"
-        -d "$LANDING_DOMAIN" -d "www.$LANDING_DOMAIN"
-        --email "$LETSENCRYPT_EMAIL" --agree-tos --no-eff-email
+        -d "$LANDING_DOMAIN" -d "www.$LANDING_DOMAIN" --non-interactive --agree-tos
         --deploy-hook "systemctl reload nginx")
+      # Without an e-mail, certbot reuses the host's existing Let's Encrypt account.
+      if [[ -n "$LETSENCRYPT_EMAIL" ]]; then certbot_cmd+=(--email "$LETSENCRYPT_EMAIL" --no-eff-email); fi
       info "Command: sudo ${certbot_cmd[*]}"
       info "(DNS A/AAAA records for $LANDING_DOMAIN and www.$LANDING_DOMAIN must point to this server.)"
       if confirm "Request the Let's Encrypt certificate now?"; then
