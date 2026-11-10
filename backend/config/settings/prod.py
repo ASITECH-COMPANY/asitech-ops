@@ -10,6 +10,12 @@ DEBUG = False
 
 if SECRET_KEY.startswith("change-me") or len(SECRET_KEY) < 50:  # noqa: F405
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must be a random value of at least 50 characters.")
+for _name in ("ASITECH_SECRETS_KEY", "ASITECH_TASK_SIGNING_KEY"):
+    if not globals()[_name]:
+        raise ImproperlyConfigured(
+            f"{_name} must be set in production (32 random bytes, urlsafe base64: "
+            "python3 -c 'import base64,os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')."
+        )
 if not DATABASES["default"]["PASSWORD"]:  # noqa: F405
     raise ImproperlyConfigured("POSTGRES_PASSWORD must be set in production.")
 

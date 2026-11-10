@@ -25,9 +25,24 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
+from apps.core import crypto
+
 from . import protocol, services
 
 logger = logging.getLogger("asitech.agents")
+
+
+def record_logs(**kwargs):
+    from apps.applications.services import record_logs as _record_logs
+
+    return _record_logs(**kwargs)
+
+
+def update_status(**kwargs):
+    from apps.applications.services import update_status as _update_status
+
+    return _update_status(**kwargs)
+
 
 CLOSE_BAD_REQUEST = 4400
 CLOSE_UNAUTHORIZED = 4401
@@ -93,6 +108,19 @@ class AgentConsumer(AsyncWebsocketConsumer):
             return
         if kind == "heartbeat":
             await self._heartbeat(message)
+        elif kind == "task.log":
+            await database_sync_to_async(record_logs)(
+                server_id=self.server_id, task_id=message.get("task_id"), lines=message.get("lines")
+            )
+        elif kind == "task.status":
+            await database_sync_to_async(update_status)(
+                server_id=self.server_id,
+                task_id=message.get("task_id"),
+                status=message.get("status"),
+                step=message.get("step", ""),
+                error=message.get("error", ""),
+                result=message.get("result"),
+            )
         elif kind == "ping":
             await self._send({"type": "pong"})
         else:
@@ -121,6 +149,7 @@ class AgentConsumer(AsyncWebsocketConsumer):
                 "type": "welcome",
                 "server_id": self.server_id,
                 "heartbeat_interval": protocol.HEARTBEAT_INTERVAL_SECONDS,
+                "control_plane_public_key": crypto.task_public_key_b64(),
             }
         )
 
@@ -142,6 +171,10 @@ class AgentConsumer(AsyncWebsocketConsumer):
         )
         if not valid:
             await self.close(code=CLOSE_REVOKED)
+
+    async def agent_task(self, event):
+        """Group message carrying a signed task for this agent."""
+        await self._send(event["message"])
 
     async def agent_revoke(self, event):
         """Group message sent on revocation, deletion or re-enrollment."""

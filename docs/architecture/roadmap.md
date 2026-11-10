@@ -38,13 +38,18 @@ keep both in sync.
 - [ ] Validate `install.sh` on fresh Ubuntu 22.04 (python3.11) / 24.04 and Debian 12 servers (systemd, docker group)
 - [ ] Packaged agent releases (no repository checkout needed) — with the Phase 5 distribution work
 
-## Phase 3 — Deployment engine
+## Phase 3 — Deployment engine · *in progress*
 
-- Applications (repo, branch, build type, env vars encrypted at rest, ports, health checks)
-- Signed task protocol; Git checkout, BuildKit image builds, Compose deployments on the agent
-- Streaming build/deploy logs; deployment history
-- Health-checked switch-over: the current release keeps running until the new one is healthy
-- Rollback to the last successful release
+- [x] Applications (repo, branch, build type, ports, health checks), access tokens and env vars encrypted at rest
+- [x] Signed, expiring, single-use tasks (Ed25519, pinned key, persistent replay memory)
+- [x] Agent: Git checkout (token via environment), BuildKit image build, candidate container, health check
+- [x] Switch-over only after the candidate is healthy; automatic restore if the switch fails
+- [x] Rollback to a previous successful release by image (no rebuild); last 5 images kept
+- [x] Compose deployments with a security policy (no privileged, host namespaces, Docker socket, host paths)
+- [x] Live deployment logs (secrets masked), history, org-wide deployment list, dashboard
+- [ ] Validate end to end on a real server with a real application (the first real run, on a dev machine, stopped at `git clone` on a wrong branch name, which was reported correctly)
+- [ ] Compose: zero-interruption switch-over (Compose replaces containers in place; the previous release is restored on failure)
+- [ ] SSH deploy keys, webhooks (deploy on push), build caches
 
 ## Phase 4 — Infrastructure management
 

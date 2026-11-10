@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **Deployment engine (Phase 3):** applications from Git (Dockerfile or
+  Compose), encrypted environment variables and access tokens, signed and
+  single-use agent tasks, candidate container + health check before the
+  switch-over, automatic restore on failure, rollback by image, Compose security
+  policy, live masked logs, deployment history, dashboard pages.
 - **Server agent (Phase 2):** servers with environment/project labels,
   single-use hashed enrollment tokens, Ed25519 agent identities generated on the
   server, challenge/response authentication over an outbound WebSocket, signed

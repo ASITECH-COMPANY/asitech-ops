@@ -49,10 +49,27 @@ updated with every phase. Report vulnerabilities privately (see
 | Agent revocation *(Phase 2)* | Revoke/delete/re-enroll revokes the key and closes the live socket (4403); stale connections cannot mark a server offline; credentials re-checked on every heartbeat | `apps/servers/services.py` |
 | Agent host *(Phase 2)* | Unprivileged system user, key file 0600 in a 0700 state dir (refused if readable by others), TLS-only (plain HTTP only to loopback), certificate verification always on, systemd sandboxing (no capabilities, read-only system, syscall filter); the enrollment token never appears on a command line | `agent/` |
 
-## The Docker socket (root-equivalent) — design for Phase 3+
+## The Docker socket (root-equivalent)
 
-In Phase 2 the agent only reads the Docker version (`GET /version`), and joining
-the `docker` group is opt-in at installation time.
+In Phase 2 the agent only reads the Docker version; joining the `docker` group is
+opt-in at installation and required for deployments (Phase 3). Implemented controls:
+
+* **Signed tasks:** Ed25519 signature by a key held only by the Control Plane
+  (`ASITECH_TASK_SIGNING_KEY`), pinned by the agent at enrollment; tasks are bound
+  to one server, expire after 5 minutes and are executed at most once (persistent
+  replay memory).
+* **No shell:** every program is started with an argument list; repository URL
+  (https only), branch, image names, paths (must stay inside the checkout),
+  environment keys and ports are validated by the agent itself, independently of
+  the Control Plane.
+* **Containers:** `no-new-privileges`, no privileged mode, no host network; ports
+  bound to 127.0.0.1 unless the administrator explicitly chooses all interfaces.
+* **Compose policy:** privileged mode, host namespaces, extra capabilities, host
+  devices, unconfined security profiles, Docker socket mounts and bind mounts
+  outside the repository are refused before anything is built.
+* **Secrets:** environment variables and repository tokens are encrypted at rest
+  (Fernet, `ASITECH_SECRETS_KEY`), never returned by the API, passed to Git and
+  Docker through the environment (never on a command line), and masked in logs.
 
 Anyone who can talk to `/var/run/docker.sock` can mount the host filesystem and
 become root. ASITECH OPS treats it accordingly:

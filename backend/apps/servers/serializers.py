@@ -78,6 +78,9 @@ class AgentEnrolledSerializer(serializers.Serializer):
     websocket_path = serializers.CharField()
     heartbeat_interval = serializers.IntegerField()
     protocol = serializers.IntegerField()
+    control_plane_public_key = serializers.CharField(
+        help_text="Ed25519 key that signs tasks (pinned by the agent)"
+    )
 
 
 class MetricPointSerializer(serializers.Serializer):

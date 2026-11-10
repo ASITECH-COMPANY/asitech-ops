@@ -17,7 +17,9 @@ from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed, InvalidHandshake, InvalidURI
 
 from . import __version__, identity, protocol, system
-from .config import AgentConfig, websocket_url
+from .config import AgentConfig, state_dir, websocket_url
+from .deploy import Deployer
+from .tasks import ReplayStore, TaskRunner, TaskVerifier
 
 logger = logging.getLogger("asitech_agent")
 
@@ -68,6 +70,32 @@ class Agent:
         self.url = websocket_url(config.control_plane_url, config.websocket_path)
         self.ssl = ssl_context(config.ca_file) if self.url.startswith("wss://") else None
         self.stopping = asyncio.Event()
+        # Task reports survive reconnections: they wait here until a connection is up.
+        self.outbox: asyncio.Queue[dict] = asyncio.Queue(maxsize=10_000)
+        self.replay = ReplayStore(state_dir() / "tasks.json")
+        self.runner = TaskRunner(self._verifier, Deployer(state_dir()), self._enqueue)
+
+    def _verifier(self) -> TaskVerifier | None:
+        if not self.config.control_plane_public_key:
+            return None
+        return TaskVerifier(self.config.control_plane_public_key, self.config.server_id, self.replay)
+
+    async def _enqueue(self, message: dict) -> None:
+        if self.outbox.full():
+            with contextlib.suppress(asyncio.QueueEmpty):
+                self.outbox.get_nowait()  # drop the oldest report rather than block a deployment
+        self.outbox.put_nowait(message)
+
+    def _pin_key(self, offered: str | None) -> None:
+        """Trust on first use for agents enrolled before task signing existed; never replace a pinned key."""
+        if not offered:
+            return
+        if not self.config.control_plane_public_key:
+            self.config.control_plane_public_key = offered
+            self.config.save()
+            logger.info("Pinned the Control Plane task-signing key")
+        elif offered != self.config.control_plane_public_key:
+            logger.error("The Control Plane presented a different task-signing key: tasks will be refused.")
 
     async def run_forever(self) -> None:
         backoff = 1
@@ -126,9 +154,11 @@ class Agent:
             if welcome.get("type") != "welcome":
                 raise ValueError(f"authentication failed: {welcome}")
             interval = max(5, int(welcome.get("heartbeat_interval", 15)))
+            self._pin_key(welcome.get("control_plane_public_key"))
             logger.info("Connected to %s as %s", self.config.control_plane_url, self.config.server_name)
 
             reader = asyncio.create_task(self._read(ws))
+            writer = asyncio.create_task(self._write(ws))
             stop = asyncio.create_task(self.stopping.wait())
             try:
                 collector = system.MetricsCollector()
@@ -139,13 +169,14 @@ class Agent:
                         payload["facts"], facts = facts, None
                     await ws.send(json.dumps(payload))
                     done, _ = await asyncio.wait(
-                        {reader, stop}, timeout=interval, return_when=asyncio.FIRST_COMPLETED
+                        {reader, writer, stop}, timeout=interval, return_when=asyncio.FIRST_COMPLETED
                     )
-                    if reader in done:
-                        reader.result()  # re-raise ConnectionClosed
+                    for finished in done & {reader, writer}:
+                        finished.result()  # re-raise ConnectionClosed
                         raise ConnectionError("the Control Plane closed the connection")
             finally:
                 reader.cancel()
+                writer.cancel()
                 stop.cancel()
 
     async def _read(self, ws) -> None:
@@ -154,5 +185,17 @@ class Agent:
                 message = json.loads(raw)
             except ValueError:
                 continue
-            if message.get("type") == "error":
+            if message.get("type") == "task":
+                self.runner.submit(message)
+            elif message.get("type") == "error":
                 logger.warning("Control Plane reported: %s", message)
+
+    async def _write(self, ws) -> None:
+        while True:
+            message = await self.outbox.get()
+            try:
+                await ws.send(json.dumps(message))
+            except Exception:
+                # Keep it for the next connection.
+                self.outbox.put_nowait(message)
+                raise

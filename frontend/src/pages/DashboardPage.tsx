@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, CircleDashed, Mail, Server, ShieldCheck, Users } from "lucide-react";
+import { AppWindow, ArrowRight, CheckCircle2, CircleDashed, Server, ShieldCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link, useOutletContext } from "react-router";
 
@@ -49,7 +49,7 @@ export function ActivityItem({ entry }: { entry: AuditEntry }) {
 const MODULES: { key: MessageKey; phase: string | null }[] = [
   { key: "dashboard.module.organizations", phase: null },
   { key: "dashboard.module.servers", phase: null },
-  { key: "dashboard.module.deployments", phase: "Phase 3" },
+  { key: "dashboard.module.deployments", phase: null },
   { key: "dashboard.module.infrastructure", phase: "Phase 4" },
   { key: "dashboard.module.production", phase: "Phase 5" },
 ];
@@ -69,7 +69,7 @@ export function DashboardPage() {
     <>
       <PageHeader title={t("dashboard.title")} description={t("dashboard.subtitle", { org: org.name })} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label={t("dashboard.servers")}
           value={data.stats.servers}
@@ -83,14 +83,14 @@ export function DashboardPage() {
           label={t("dashboard.members")}
           value={data.stats.members}
           icon={<Users className="size-4" />}
-          hint={`${t("dashboard.yourRole")} : ${t(`role.${data.organization.role}`)}`}
+          hint={`${admins} ${t("dashboard.admins").toLowerCase()} · ${t("dashboard.pendingInvites").toLowerCase()} : ${data.stats.pending_invitations ?? "—"}`}
         />
         <StatCard
-          label={t("dashboard.pendingInvites")}
-          value={data.stats.pending_invitations ?? "—"}
-          icon={<Mail className="size-4" />}
+          label={t("dashboard.applications")}
+          value={data.stats.applications}
+          icon={<AppWindow className="size-4" />}
+          hint={t("dashboard.deploymentsWeek", { count: data.stats.deployments_last_7d })}
         />
-        <StatCard label={t("dashboard.admins")} value={admins} icon={<ShieldCheck className="size-4" />} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">

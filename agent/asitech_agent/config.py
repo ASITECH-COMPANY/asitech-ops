@@ -59,6 +59,8 @@ class AgentConfig:
     organization: str = ""
     websocket_path: str = "/ws/agent/v1/connect/"
     ca_file: str | None = None
+    # Ed25519 key that signs tasks; pinned at enrollment (or first connection).
+    control_plane_public_key: str = ""
 
     def save(self) -> None:
         path = config_path()

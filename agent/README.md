@@ -5,8 +5,14 @@ A small Python service installed on each managed Linux server. It connects
 key generated on the server, and reports system facts and metrics every 15 s.
 
 * No listening port, no inbound management API.
-* No shell execution: in Phase 2 the channel carries only status and metrics;
-  Phase 3 adds a closed set of validated, signed deployment operations.
+* No shell execution: the Control Plane can only send **signed, expiring,
+  single-use deployment tasks** (Ed25519 key pinned at enrollment). The agent
+  validates every argument itself, never runs a shell, and masks secrets in logs.
+* Deployments: `git clone` (token via the environment), Docker build, candidate
+  container, health check, then switch-over. The running release is stopped only
+  after the new one is healthy, and restored if the switch-over fails. Compose
+  files go through a security policy first (see `asitech_agent/compose.py`).
+  Requires `git`, Docker and membership of the `docker` group.
 * Runs as the unprivileged `asitech-agent` user under a hardened systemd unit.
 
 ## Install on a server
@@ -74,6 +80,9 @@ asitech_agent/
   config.py     state directory, URL validation (TLS only)
   system.py     facts and metrics from /proc, statvfs and the Docker socket
   protocol.py   protocol v1 constants
+  tasks.py      signed task verification, replay memory, runner, log masking
+  deploy.py     Git checkout, build, health-checked switch-over, rollback, removal
+  compose.py    Compose security policy
 systemd/asitech-agent.service   hardened unit
 install.sh / uninstall.sh
 ```

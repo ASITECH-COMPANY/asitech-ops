@@ -59,6 +59,8 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.prod
           DJANGO_SECRET_KEY: ci-only-0123456789-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJ
           DJANGO_ALLOWED_HOSTS: ops.example.com
+          ASITECH_SECRETS_KEY: Y2ktb25seS1zZWNyZXRzLWtleS0zMi1ieXRlcyEhISE=
+          ASITECH_TASK_SIGNING_KEY: Y2ktb25seS10YXNrLXNpZ25pbmcta2V5LTMyLWJ5dGU=
         run: python manage.py check --deploy
       - name: Tests
         run: pytest --cov --cov-report=term-missing:skip-covered

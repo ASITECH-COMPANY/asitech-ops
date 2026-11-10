@@ -13,6 +13,7 @@ api_v1 = [
     path("", include("apps.audit.urls")),
     path("", include("apps.dashboard.urls")),
     path("", include("apps.servers.urls")),
+    path("", include("apps.applications.urls")),
 ]
 
 urlpatterns = [

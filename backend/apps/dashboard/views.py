@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from django.db.models import Count
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.applications.models import Application, Deployment
 from apps.audit.models import AuditLog
 from apps.audit.serializers import AuditLogSerializer
 from apps.organizations.access import OrganizationScopedMixin
@@ -71,6 +75,10 @@ class DashboardView(OrganizationScopedMixin, APIView):
                 "stats": {
                     "members": sum(members_by_role.values()),
                     "servers": sum(servers_by_status.values()),
+                    "applications": Application.objects.filter(organization=org).count(),
+                    "deployments_last_7d": Deployment.objects.filter(
+                        application__organization=org, created_at__gte=timezone.now() - timedelta(days=7)
+                    ).count(),
                     "pending_invitations": (
                         Invitation.objects.filter(organization=org).pending().count()
                         if can_manage_invites

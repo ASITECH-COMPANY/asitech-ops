@@ -159,11 +159,32 @@ Admins manage admins, members and viewers; only owners grant, change or remove
 the owner role. The matrix lives in `backend/apps/organizations/roles.py`
 (single source of truth, mirrored in `frontend/src/lib/permissions.ts`).
 
-## Planned contracts (Phase 3, subject to review)
+### Applications and deployments (Phase 3)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET / POST | `/organizations/{slug}/applications/` | `applications.view` / `applications.manage` | List; create (`repo_url` https only, `branch`, `repo_token` write-only, `build_type` dockerfile\|compose, paths inside the repo, `start_command` list, `container_port`, `host_port` 1024–65535, `bind_address`, health check) |
+| GET / PATCH / DELETE | `/organizations/{slug}/applications/{id}/` | view / manage / manage | Details; edit (identifier and server are immutable); delete (the agent removes the containers) |
+| GET / PUT | `/organizations/{slug}/applications/{id}/environment/` | view / manage | Variables; secret values are never returned. PUT replaces the set; a secret sent without `value` keeps its stored value |
+| GET / POST | `/organizations/{slug}/applications/{id}/deployments/` | view / `applications.deploy` | History; deploy the branch (409 if the server is not online or a deployment is running; throttled 30/h) |
+| GET | `/organizations/{slug}/deployments/?status=` | `applications.view` | All deployments of the organization |
+| GET | `/organizations/{slug}/deployments/{id}/` | `applications.view` | Status, step, commit, image, error |
+| GET | `/organizations/{slug}/deployments/{id}/logs/?after=N` | `applications.view` | Incremental logs (up to 1000 lines per call) |
+| POST | `/organizations/{slug}/deployments/{id}/rollback/` | `applications.deploy` | Redeploy the image of a previous successful release (no rebuild) |
+
+Roles: `applications.manage` = owner, admin; `applications.deploy` = owner, admin, member.
+
+### Signed tasks (Control Plane → agent)
 
 ```text
-POST   /organizations/{slug}/applications/
-POST   /organizations/{slug}/applications/{id}/deployments/   -> trigger
-POST   /organizations/{slug}/deployments/{id}/rollback/
-WS     /ws/v1/organizations/{slug}/deployments/{id}/logs/
+{"type": "task",
+ "task": {"id", "kind": "deploy", "server_id", "issued_at", "expires_at", "timeout_seconds", "payload"},
+ "signature": base64(Ed25519("asitech-task-v1\n" + canonical_json(task)))}
 ```
+
+The agent pins the Control Plane public key (`ASITECH_TASK_SIGNING_KEY`), and
+rejects a task whose signature, `server_id`, expiry (5 min) or `id` (persistent
+replay memory) is wrong. Payload actions: `deploy` (from Git, or from an existing
+`image` for rollbacks) and `remove`. The agent reports with
+`{"type": "task.log", "task_id", "lines": [{"stream", "message"}]}` and
+`{"type": "task.status", "task_id", "status": "running|succeeded|failed", "step", "error", "result"}`.

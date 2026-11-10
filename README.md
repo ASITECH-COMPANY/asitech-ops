@@ -19,7 +19,8 @@
 
 > **Status: early development — not production ready.** Accounts, organizations,
 > roles, invitations, audit log (Phase 1) and the server agent with metrics
-> (Phase 2) work today. Deployments arrive in Phase 3.
+> (Phase 2) and Git deployments with health-checked switch-over and rollback
+> (Phase 3) work today; they are being validated on real servers.
 > See the [roadmap](docs/architecture/roadmap.md).
 
 ## What it is
@@ -45,7 +46,7 @@ here is a mock-up of features that do not exist.
 | Bilingual dashboard (FR/EN), light/dark themes | ✅ Phase 1 |
 | OpenAPI documentation | ✅ Phase 1 |
 | Server registration, secure agent (Ed25519, outbound TLS), metrics, online/offline | ✅ Phase 2 (being validated on real servers) |
-| Git / Dockerfile / Compose deployments, logs, history, rollback | 🗓 Phase 3 |
+| Git / Dockerfile / Compose deployments, live logs, history, rollback | ✅ Phase 3 (being validated on real servers) |
 | Containers, images, volumes, networks, live logs, monitoring | 🗓 Phase 4 |
 | Domains & SSL, backups, notifications, VPS installer | 🗓 Phase 5 |
 

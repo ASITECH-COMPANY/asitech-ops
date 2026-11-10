@@ -12,7 +12,10 @@ export type Permission =
   | "invitations.manage"
   | "audit.view"
   | "servers.view"
-  | "servers.manage";
+  | "servers.manage"
+  | "applications.view"
+  | "applications.manage"
+  | "applications.deploy";
 
 export type Language = "en" | "fr";
 
@@ -149,8 +152,86 @@ export interface ServerMetrics {
 
 export interface DashboardSummary {
   organization: { id: string; name: string; slug: string; role: Role };
-  stats: { members: number; servers: number; pending_invitations: number | null };
+  stats: {
+    members: number;
+    servers: number;
+    applications: number;
+    deployments_last_7d: number;
+    pending_invitations: number | null;
+  };
   servers_by_status: Record<ServerStatus, number>;
   members_by_role: Record<Role, number>;
   recent_activity: AuditEntry[] | null;
+}
+
+export type DeploymentStatus = "queued" | "running" | "succeeded" | "failed";
+
+export interface DeploymentBrief {
+  id: string;
+  number: number;
+  status: DeploymentStatus;
+  commit_sha: string;
+  created_at: string;
+  finished_at: string | null;
+}
+
+export interface Application {
+  id: string;
+  name: string;
+  slug: string;
+  server: { id: string; name: string; status: ServerStatus };
+  repo_url: string;
+  branch: string;
+  has_repo_token: boolean;
+  build_type: "dockerfile" | "compose";
+  dockerfile_path: string;
+  build_context: string;
+  compose_file: string;
+  start_command: string[];
+  container_port: number | null;
+  host_port: number | null;
+  bind_address: "127.0.0.1" | "0.0.0.0";
+  healthcheck_path: string;
+  healthcheck_timeout_seconds: number;
+  current_deployment: DeploymentBrief | null;
+  last_deployment: DeploymentBrief | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ApplicationInput = Partial<
+  Omit<Application, "id" | "server" | "has_repo_token" | "current_deployment" | "last_deployment" | "created_at" | "updated_at">
+> & { server?: string; repo_token?: string };
+
+export interface EnvVar {
+  key: string;
+  value: string | null;
+  is_secret: boolean;
+  updated_at?: string;
+}
+
+export interface Deployment {
+  id: string;
+  number: number;
+  application: { id: string; name: string; slug: string };
+  status: DeploymentStatus;
+  trigger: "manual" | "rollback";
+  rollback_of_number: number | null;
+  triggered_by: string | null;
+  branch: string;
+  commit_sha: string;
+  image: string;
+  step: string;
+  error: string;
+  is_current: boolean;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+}
+
+export interface DeploymentLogLine {
+  seq: number;
+  ts: string;
+  stream: "stdout" | "stderr" | "system";
+  message: string;
 }

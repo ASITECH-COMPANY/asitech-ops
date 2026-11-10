@@ -2,7 +2,12 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import { api, ApiError } from "../lib/api";
 import type {
+  Application,
+  ApplicationInput,
   AuditEntry,
+  Deployment,
+  DeploymentLogLine,
+  EnvVar,
   CreatedInvitation,
   CreatedServer,
   Enrollment,
@@ -29,6 +34,8 @@ export const keys = {
   invitations: (slug: string) => ["org", slug, "invitations"] as const,
   audit: (slug: string) => ["org", slug, "audit"] as const,
   servers: (slug: string) => ["org", slug, "servers"] as const,
+  applications: (slug: string) => ["org", slug, "applications"] as const,
+  deployments: (slug: string) => ["org", slug, "deployments"] as const,
   server: (slug: string, id: string) => ["org", slug, "servers", id] as const,
 };
 
@@ -279,4 +286,114 @@ export function useServerAction(slug: string, id: string) {
       onSuccess,
     }),
   };
+}
+
+// ---- Applications & deployments ----------------------------------------------------------
+
+export function useApplications(slug: string, search = "") {
+  return useQuery({
+    queryKey: [...keys.applications(slug), "list", search],
+    queryFn: () => api<Paginated<Application>>(`/organizations/${slug}/applications/`, { query: { search } }),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useApplication(slug: string, id: string) {
+  return useQuery({
+    queryKey: [...keys.applications(slug), id],
+    queryFn: () => api<Application>(`/organizations/${slug}/applications/${id}/`),
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
+  });
+}
+
+export function useSaveApplication(slug: string, id?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ApplicationInput) =>
+      id
+        ? api<Application>(`/organizations/${slug}/applications/${id}/`, { method: "PATCH", body })
+        : api<Application>(`/organizations/${slug}/applications/`, { method: "POST", body }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+export function useDeleteApplication(slug: string, id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      api<{ containers_removal_sent: boolean }>(`/organizations/${slug}/applications/${id}/`, { method: "DELETE" }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+export function useEnvironment(slug: string, id: string, enabled = true) {
+  return useQuery({
+    queryKey: [...keys.applications(slug), id, "env"],
+    queryFn: () => api<EnvVar[]>(`/organizations/${slug}/applications/${id}/environment/`),
+    enabled,
+  });
+}
+
+export function useSetEnvironment(slug: string, id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { key: string; value?: string | null; is_secret: boolean }[]) =>
+      api<EnvVar[]>(`/organizations/${slug}/applications/${id}/environment/`, {
+        method: "PUT",
+        body: { variables },
+      }),
+    onSuccess: (data) => qc.setQueryData([...keys.applications(slug), id, "env"], data),
+  });
+}
+
+export function useAppDeployments(slug: string, id: string, page: number) {
+  return useQuery({
+    queryKey: [...keys.deployments(slug), "app", id, page],
+    queryFn: () =>
+      api<Paginated<Deployment>>(`/organizations/${slug}/applications/${id}/deployments/`, { query: { page } }),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useDeployments(slug: string, page: number) {
+  return useQuery({
+    queryKey: [...keys.deployments(slug), "all", page],
+    queryFn: () => api<Paginated<Deployment>>(`/organizations/${slug}/deployments/`, { query: { page } }),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useDeployment(slug: string, id: string) {
+  return useQuery({
+    queryKey: [...keys.deployments(slug), id],
+    queryFn: () => api<Deployment>(`/organizations/${slug}/deployments/${id}/`),
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
+    refetchInterval: (query) =>
+      query.state.data && ["queued", "running"].includes(query.state.data.status) ? 3_000 : false,
+  });
+}
+
+export function deploymentLogs(slug: string, id: string, after: number) {
+  return api<{ status: Deployment["status"]; lines: DeploymentLogLine[] }>(
+    `/organizations/${slug}/deployments/${id}/logs/`,
+    { query: { after } },
+  );
+}
+
+export function useDeploy(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (appId: string) =>
+      api<Deployment>(`/organizations/${slug}/applications/${appId}/deployments/`, { method: "POST" }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
+}
+
+export function useRollback(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (deploymentId: string) =>
+      api<Deployment>(`/organizations/${slug}/deployments/${deploymentId}/rollback/`, { method: "POST" }),
+    onSuccess: () => invalidateOrg(qc, slug),
+  });
 }

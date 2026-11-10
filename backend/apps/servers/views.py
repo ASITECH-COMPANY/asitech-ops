@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core import crypto
 from apps.core.request import client_ip
 from apps.organizations.access import OrganizationScopedMixin
 from apps.organizations.models import hash_token
@@ -222,5 +223,6 @@ class AgentEnrollView(APIView):
             "websocket_path": "/ws/agent/v1/connect/",
             "heartbeat_interval": protocol.HEARTBEAT_INTERVAL_SECONDS,
             "protocol": protocol.PROTOCOL_VERSION,
+            "control_plane_public_key": crypto.task_public_key_b64(),
         }
         return Response(AgentEnrolledSerializer(body).data, status=status.HTTP_201_CREATED)

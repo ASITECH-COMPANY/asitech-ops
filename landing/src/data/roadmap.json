@@ -30,7 +30,7 @@
     },
     {
       "id": "phase-3",
-      "status": "planned",
+      "status": "in-progress",
       "title": { "fr": "Phase 3 — Moteur de déploiement", "en": "Phase 3 — Deployment engine" },
       "items": {
         "fr": ["Déploiements Git, Dockerfile et Compose", "Logs de build, historique et contrôles de santé", "Retour arrière vers la dernière version saine"],

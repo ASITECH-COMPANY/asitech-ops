@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.dashboard",
     "apps.realtime",
     "apps.servers",
+    "apps.applications",
 ]
 
 MIDDLEWARE = [
@@ -122,6 +123,10 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_BEAT_SCHEDULE = {
     "mark-stale-servers-offline": {
         "task": "apps.servers.tasks.mark_stale_servers_offline",
+        "schedule": 60.0,
+    },
+    "fail-stale-deployments": {
+        "task": "apps.applications.tasks.fail_stale_deployments",
         "schedule": 60.0,
     },
     "purge-old-metrics": {
@@ -205,6 +210,7 @@ REST_FRAMEWORK = {
         "invitation": env_str("THROTTLE_INVITATION", "20/min"),
         "password": env_str("THROTTLE_PASSWORD", "5/min"),
         "agent_enroll": env_str("THROTTLE_AGENT_ENROLL", "10/min"),
+        "deploy": env_str("THROTTLE_DEPLOY", "30/hour"),
     },
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -226,6 +232,10 @@ SPECTACULAR_SETTINGS = {
     "REDOC_DIST": "SIDECAR",
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]+",
+    "ENUM_NAME_OVERRIDES": {
+        "ServerStatusEnum": "apps.servers.models.Server.Status",
+        "DeploymentStatusEnum": "apps.applications.models.Deployment.Status",
+    },
 }
 # API docs are always available to authenticated users. Set to true to expose
 # them anonymously (they contain no secrets, but reveal the exact version).
@@ -256,6 +266,16 @@ AGENT_AUTH_TIMEOUT_SECONDS = env_int("AGENT_AUTH_TIMEOUT_SECONDS", 10)
 AGENT_OFFLINE_AFTER_SECONDS = env_int("AGENT_OFFLINE_AFTER_SECONDS", 90)
 METRICS_SAMPLE_INTERVAL_SECONDS = env_int("METRICS_SAMPLE_INTERVAL_SECONDS", 55)
 METRICS_RETENTION_DAYS = env_int("METRICS_RETENTION_DAYS", 7)
+
+# --- Deployments (Phase 3) -----------------------------------------------------------------
+# Fernet key for secrets at rest and Ed25519 seed for signing agent tasks (both 32 bytes,
+# urlsafe base64). Derived from DJANGO_SECRET_KEY when empty (development only).
+ASITECH_SECRETS_KEY = env_str("ASITECH_SECRETS_KEY", "")
+ASITECH_TASK_SIGNING_KEY = env_str("ASITECH_TASK_SIGNING_KEY", "")
+# An agent must pick a task up within this window, or it expires (replay protection).
+TASK_TTL_SECONDS = env_int("TASK_TTL_SECONDS", 300)
+DEPLOYMENT_TIMEOUT_SECONDS = env_int("DEPLOYMENT_TIMEOUT_SECONDS", 1800)
+DEPLOYMENT_LOG_MAX_LINES = env_int("DEPLOYMENT_LOG_MAX_LINES", 5000)
 
 # --- Logging (structured JSON on stdout) ----------------------------------------------------
 LOG_LEVEL = env_str("LOG_LEVEL", "INFO")

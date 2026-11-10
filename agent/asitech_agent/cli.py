@@ -43,6 +43,7 @@ def _enroll(args: argparse.Namespace) -> int:
         organization=result.get("organization", ""),
         websocket_path=result.get("websocket_path", "/ws/agent/v1/connect/"),
         ca_file=args.ca_file,
+        control_plane_public_key=result.get("control_plane_public_key", ""),
     ).save()
     print(f"Enrolled as '{result.get('server_name')}' in '{result.get('organization')}'.")
     print(f"Key fingerprint: {identity.fingerprint(key)}")
@@ -79,6 +80,7 @@ def _status(_: argparse.Namespace) -> int:
     print(f"Server        : {config.server_name} ({config.server_id})")
     print(f"Organization  : {config.organization}")
     print(f"Key           : {identity.fingerprint(key)}")
+    print(f"Task key      : {'pinned' if config.control_plane_public_key else 'not pinned yet'}")
     return 0
 
 

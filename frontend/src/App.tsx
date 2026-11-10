@@ -17,6 +17,10 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { OrgLayout } from "./pages/OrgLayout";
 import { OrgSettingsPage } from "./pages/OrgSettingsPage";
+import { ApplicationDetailPage } from "./pages/ApplicationDetailPage";
+import { ApplicationsPage } from "./pages/ApplicationsPage";
+import { DeploymentDetailPage } from "./pages/DeploymentDetailPage";
+import { DeploymentsPage } from "./pages/DeploymentsPage";
 import { ServerDetailPage } from "./pages/ServerDetailPage";
 import { ServersPage } from "./pages/ServersPage";
 
@@ -64,8 +68,10 @@ export const routes = [
               { path: "settings", element: <OrgSettingsPage /> },
               { path: "servers", element: <ServersPage /> },
               { path: "servers/:serverId", element: <ServerDetailPage /> },
-              { path: "applications", element: <ComingSoonPage module="applications" /> },
-              { path: "deployments", element: <ComingSoonPage module="deployments" /> },
+              { path: "applications", element: <ApplicationsPage /> },
+              { path: "applications/:appId", element: <ApplicationDetailPage /> },
+              { path: "deployments", element: <DeploymentsPage /> },
+              { path: "deployments/:deploymentId", element: <DeploymentDetailPage /> },
               { path: "monitoring", element: <ComingSoonPage module="monitoring" /> },
             ],
           },

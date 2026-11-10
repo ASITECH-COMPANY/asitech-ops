@@ -29,6 +29,13 @@ class AuditAction(models.TextChoices):
     SERVER_REVOKED = "server.revoked"
     SERVER_DELETED = "server.deleted"
 
+    APPLICATION_CREATED = "application.created"
+    APPLICATION_UPDATED = "application.updated"
+    APPLICATION_DELETED = "application.deleted"
+    APPLICATION_ENV_UPDATED = "application.env_updated"
+    DEPLOYMENT_STARTED = "deployment.started"
+    DEPLOYMENT_ROLLBACK = "deployment.rollback"
+
 
 # Which dashboard resource an action affects. Used by the real-time channel so
 # clients know what to refresh, without leaking audit details to every member.
@@ -48,4 +55,10 @@ ACTION_RESOURCE = {
     AuditAction.SERVER_ENROLLED: "servers",
     AuditAction.SERVER_REVOKED: "servers",
     AuditAction.SERVER_DELETED: "servers",
+    AuditAction.APPLICATION_CREATED: "applications",
+    AuditAction.APPLICATION_UPDATED: "applications",
+    AuditAction.APPLICATION_DELETED: "applications",
+    AuditAction.APPLICATION_ENV_UPDATED: "applications",
+    AuditAction.DEPLOYMENT_STARTED: "deployments",
+    AuditAction.DEPLOYMENT_ROLLBACK: "deployments",
 }

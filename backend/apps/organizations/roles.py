@@ -31,6 +31,9 @@ class Perm(StrEnum):
     SERVERS_VIEW = "servers.view"
     # Registering or revoking a server grants Docker (root-equivalent) control over it.
     SERVERS_MANAGE = "servers.manage"
+    APPS_VIEW = "applications.view"
+    APPS_MANAGE = "applications.manage"  # create/edit apps and their environment variables
+    APPS_DEPLOY = "applications.deploy"  # deploy and roll back
 
 
 _ALL = frozenset(Role)
@@ -46,6 +49,9 @@ ROLE_PERMISSIONS: dict[Perm, frozenset[Role]] = {
     Perm.ORG_DELETE: frozenset({Role.OWNER}),
     Perm.SERVERS_VIEW: _ALL,
     Perm.SERVERS_MANAGE: _ADMINS,
+    Perm.APPS_VIEW: _ALL,
+    Perm.APPS_MANAGE: _ADMINS,
+    Perm.APPS_DEPLOY: frozenset({Role.OWNER, Role.ADMIN, Role.MEMBER}),
 }
 
 

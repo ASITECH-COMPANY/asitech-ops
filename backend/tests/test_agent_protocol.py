@@ -5,6 +5,7 @@ from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from django.test import override_settings
 
+from apps.core import crypto
 from apps.servers import protocol, services
 from apps.servers.models import MetricSample, Server
 from config.asgi import application
@@ -72,7 +73,12 @@ def test_agent_authenticates_reports_metrics_and_goes_offline(team):
     async def scenario():
         client = WebsocketClient(application, PATH)
         welcome = await authenticate(client, server_id, key)
-        assert welcome == {"type": "welcome", "server_id": server_id, "heartbeat_interval": 15}
+        assert welcome == {
+            "type": "welcome",
+            "server_id": server_id,
+            "heartbeat_interval": 15,
+            "control_plane_public_key": crypto.task_public_key_b64(),
+        }
         assert (await database_sync_to_async(Server.objects.get)(pk=server_id)).status == "online"
 
         await client.send_json_to(
@@ -226,3 +232,59 @@ def test_signature_vector_shared_with_the_agent():
     message = protocol.auth_message(server_id, bytes([7]) * 32)
     assert protocol.verify_signature(public_key, message, signature)
     assert not protocol.verify_signature(public_key, message + b"x", signature)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_task_round_trip_over_the_agent_socket(team):
+    from apps.applications import services as app_services
+    from apps.applications.models import Application, Deployment
+
+    server, key = enroll(team)
+    server_id = str(server.pk)
+
+    async def scenario():
+        client = WebsocketClient(application, PATH)
+        welcome = await authenticate(client, server_id, key)
+        assert welcome["control_plane_public_key"]
+
+        def start():
+            app = Application.objects.create(
+                organization=team["org"],
+                server=Server.objects.get(pk=server_id),
+                name="Web",
+                slug="web",
+                repo_url="https://github.com/example/web.git",
+            )
+            return app_services.start_deployment(app, actor=team["admin"])
+
+        deployment = await database_sync_to_async(start)()
+        message = await client.receive_json_from(timeout=3)
+        assert message["type"] == "task"
+        assert message["task"]["id"] == str(deployment.pk)
+        assert message["task"]["kind"] == "deploy"
+
+        task_id = str(deployment.pk)
+        await client.send_json_to(
+            {"type": "task.status", "task_id": task_id, "status": "running", "step": "clone"}
+        )
+        await client.send_json_to(
+            {"type": "task.log", "task_id": task_id, "lines": [{"stream": "stdout", "message": "hello"}]}
+        )
+        await client.send_json_to(
+            {
+                "type": "task.status",
+                "task_id": task_id,
+                "status": "succeeded",
+                "result": {"image": "asitech/web:d1"},
+            }
+        )
+        await client.send_json_to({"type": "ping"})
+        await client.receive_json_from()  # pong: previous messages were processed
+        await client.disconnect()
+
+        final = await database_sync_to_async(Deployment.objects.get)(pk=task_id)
+        assert final.status == "succeeded"
+        assert final.is_current
+        assert await database_sync_to_async(final.logs.count)() == 1
+
+    async_to_sync(scenario)()
