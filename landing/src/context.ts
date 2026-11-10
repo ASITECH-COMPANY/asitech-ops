@@ -1,7 +1,7 @@
-import en from "./i18n/en.json";
-import fr from "./i18n/fr.json";
-import roadmap from "./data/roadmap.json";
-import site from "./data/site.json";
+import en from "./i18n/en.json" with { type: "json" };
+import fr from "./i18n/fr.json" with { type: "json" };
+import roadmap from "./data/roadmap.json" with { type: "json" };
+import site from "./data/site.json" with { type: "json" };
 
 export type Lang = "fr" | "en";
 export type Dict = typeof fr;

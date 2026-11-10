@@ -1,7 +1,7 @@
-import type { Ctx } from "../context";
-import { esc, fill } from "../lib/html";
-import { icon } from "../lib/icons";
-import { logo } from "./Header";
+import type { Ctx } from "../context.ts";
+import { esc, fill } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
+import { logo } from "./Header.ts";
 
 export function Footer(ctx: Ctx): string {
   const f = ctx.t.footer;

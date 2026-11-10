@@ -1,7 +1,7 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon } from "../lib/icons";
-import { section, sectionHeading } from "./common";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
+import { section, sectionHeading } from "./common.ts";
 
 function controlPlane(x: number, y: number, w: number, a: Ctx["t"]["architecture"]): string {
   const items = a.controlPlaneItems

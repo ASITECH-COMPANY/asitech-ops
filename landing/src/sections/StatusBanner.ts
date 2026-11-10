@@ -1,6 +1,6 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon } from "../lib/icons";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
 
 type Status = "early-development" | "beta" | "stable";
 

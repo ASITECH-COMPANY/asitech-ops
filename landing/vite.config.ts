@@ -2,7 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 
-import * as staticRender from "./src/render";
+import * as staticRender from "./src/render.ts";
 
 type Renderer = typeof staticRender;
 
@@ -44,9 +44,9 @@ export default defineConfig({
     modulePreload: { polyfill: false },
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        en: resolve(__dirname, "en/index.html"),
-        notFound: resolve(__dirname, "404.html"),
+        main: resolve(import.meta.dirname, "index.html"),
+        en: resolve(import.meta.dirname, "en/index.html"),
+        notFound: resolve(import.meta.dirname, "404.html"),
       },
     },
   },

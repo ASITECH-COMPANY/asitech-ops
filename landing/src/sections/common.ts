@@ -1,4 +1,4 @@
-import { esc } from "../lib/html";
+import { esc } from "../lib/html.ts";
 
 export function sectionHeading(id: string, title: string, subtitle?: string, eyebrow?: string): string {
   return `

@@ -1,6 +1,6 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon } from "../lib/icons";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
 
 export function logo(className = "size-8"): string {
   return `<svg viewBox="0 0 32 32" class="${className}" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="7" fill="#1D4ED8"/><path d="M9 22.5 15.2 8.8a.9.9 0 0 1 1.6 0L23 22.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8 17.6h8.4" stroke="#F97316" stroke-width="2.6" stroke-linecap="round"/></svg>`;
@@ -41,7 +41,7 @@ export function Header(ctx: Ctx): string {
         <span class="dark:hidden">${icon("moon", "size-4")}</span><span class="hidden dark:inline">${icon("sun", "size-4")}</span>
       </button>
       <a href="${esc(ctx.site.repoUrl)}" target="_blank" rel="noopener noreferrer" class="ml-1 hidden h-9 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm font-medium text-fg hover:bg-surface-2 sm:inline-flex">
-        ${icon("github", "size-4")}${esc(t.nav.github)}
+        ${icon("code", "size-4")}${esc(t.nav.github)}
       </a>
       <button type="button" class="inline-flex size-9 items-center justify-center rounded-lg text-fg hover:bg-surface-2 lg:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="${esc(t.a11y.menu)}" data-label-open="${esc(t.a11y.menu)}" data-label-close="${esc(t.a11y.closeMenu)}" data-menu-toggle>
         <span data-menu-icon-open>${icon("menu", "size-5")}</span><span class="hidden" data-menu-icon-close>${icon("x", "size-5")}</span>
@@ -51,7 +51,7 @@ export function Header(ctx: Ctx): string {
   <div id="mobile-menu" class="hidden border-t border-line bg-bg px-4 pb-4 pt-2 lg:hidden" data-mobile-menu>
     <nav aria-label="Mobile">
       ${links.map((link) => navLink(link, true)).join("")}
-      <a href="${esc(ctx.site.repoUrl)}" target="_blank" rel="noopener noreferrer" class="mt-2 flex items-center gap-2 rounded-lg px-3 py-2.5 text-base text-fg hover:bg-surface-2">${icon("github", "size-5")}${esc(t.nav.github)}</a>
+      <a href="${esc(ctx.site.repoUrl)}" target="_blank" rel="noopener noreferrer" class="mt-2 flex items-center gap-2 rounded-lg px-3 py-2.5 text-base text-fg hover:bg-surface-2">${icon("code", "size-5")}${esc(t.nav.github)}</a>
     </nav>
   </div>
 </header>`;

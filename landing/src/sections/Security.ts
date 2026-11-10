@@ -1,7 +1,7 @@
-import type { Ctx } from "../context";
-import { esc, fill } from "../lib/html";
-import { icon, type IconName } from "../lib/icons";
-import { section, sectionHeading } from "./common";
+import type { Ctx } from "../context.ts";
+import { esc, fill } from "../lib/html.ts";
+import { icon, type IconName } from "../lib/icons.ts";
+import { section, sectionHeading } from "./common.ts";
 
 const ICONS: IconName[] = ["lock", "keyRound", "terminal", "scrollText", "boxes", "alert"];
 

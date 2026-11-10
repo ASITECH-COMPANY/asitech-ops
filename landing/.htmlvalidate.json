@@ -1,5 +1,7 @@
 {
-  "extends": ["html-validate:recommended"],
+  "extends": [
+    "html-validate:recommended"
+  ],
   "rules": {
     "no-inline-style": "error",
     "require-sri": "off",
@@ -7,6 +9,8 @@
     "long-title": "off",
     "attribute-boolean-style": "off",
     "no-redundant-role": "off",
-    "svg-focusable": "off"
+    "svg-focusable": "off",
+    "void-style": "off",
+    "doctype-style": "off"
   }
 }

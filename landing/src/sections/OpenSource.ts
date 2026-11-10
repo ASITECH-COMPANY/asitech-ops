@@ -1,12 +1,12 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon, type IconName } from "../lib/icons";
-import { section, sectionHeading } from "./common";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon, type IconName } from "../lib/icons.ts";
+import { section, sectionHeading } from "./common.ts";
 
 export function OpenSource(ctx: Ctx): string {
   const o = ctx.t.openSource;
   const links: [string, string, IconName, boolean][] = [
-    [ctx.site.repoUrl, o.links.repo, "github", true],
+    [ctx.site.repoUrl, o.links.repo, "code", true],
     [ctx.repo("CONTRIBUTING.md"), o.links.contributing, "bookOpen", true],
     [`${ctx.site.repoUrl}/issues`, o.links.issues, "bug", true],
     ["#roadmap", o.links.roadmap, "rocket", false],

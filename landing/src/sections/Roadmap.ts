@@ -1,7 +1,7 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon } from "../lib/icons";
-import { section, sectionHeading } from "./common";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
+import { section, sectionHeading } from "./common.ts";
 
 type Status = "planned" | "in-progress" | "done";
 

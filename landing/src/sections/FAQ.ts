@@ -1,6 +1,6 @@
-import type { Ctx } from "../context";
-import { esc, fill } from "../lib/html";
-import { section, sectionHeading } from "./common";
+import type { Ctx } from "../context.ts";
+import { esc, fill } from "../lib/html.ts";
+import { section, sectionHeading } from "./common.ts";
 
 export function FAQ(ctx: Ctx): string {
   const f = ctx.t.faq;

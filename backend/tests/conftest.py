@@ -6,7 +6,7 @@ from apps.accounts.models import User
 from apps.organizations.models import Membership, Organization
 from apps.organizations.roles import Role
 
-PASSWORD = "correct-horse-battery-staple-42"
+PASSWORD = "correct-horse-battery-staple-42"  # gitleaks:allow (test fixture)
 
 
 @pytest.fixture(autouse=True)

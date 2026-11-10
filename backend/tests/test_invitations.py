@@ -91,7 +91,7 @@ def test_anonymous_accept_creates_account_and_signs_in(client_for, team, api):
     token = token_of(invite(client_for(team["admin"]), role="viewer"))
     response = api.post(
         "/api/v1/invitations/accept/",
-        {"token": token, "full_name": "Ama Kossi", "password": "a-Strong-passphrase-2026"},
+        {"token": token, "full_name": "Ama Kossi", "password": "a-Strong-passphrase-2026"},  # gitleaks:allow
     )
     assert response.status_code == 200, response.content
     assert response.json()["slug"] == "acme"
@@ -151,7 +151,7 @@ def test_expired_and_revoked_invitations_cannot_be_accepted(client_for, team, ap
 def test_accept_requires_csrf(client_for, team):
     token = token_of(invite(client_for(team["admin"])))
     client = APIClient(enforce_csrf_checks=True)
-    payload = {"token": token, "full_name": "Ama", "password": "a-Strong-passphrase-2026"}
+    payload = {"token": token, "full_name": "Ama", "password": "a-Strong-passphrase-2026"}  # gitleaks:allow
     assert client.post("/api/v1/invitations/accept/", payload).status_code == 403
 
 

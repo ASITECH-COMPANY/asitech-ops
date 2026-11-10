@@ -1,6 +1,6 @@
-import type { Ctx } from "../context";
-import { esc } from "../lib/html";
-import { icon } from "../lib/icons";
+import type { Ctx } from "../context.ts";
+import { esc } from "../lib/html.ts";
+import { icon } from "../lib/icons.ts";
 
 /** A schematic of the planned dashboard. Deliberately free of numbers: it is an illustration, not data. */
 function illustration(ctx: Ctx): string {
@@ -76,7 +76,7 @@ export function Hero(ctx: Ctx): string {
       <p class="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted sm:text-lg">${esc(t.hero.subtitle)}</p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <a href="${esc(ctx.site.repoUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-fg shadow-sm transition-colors hover:bg-primary-hover">
-          ${icon("github", "size-4")}${esc(t.hero.ctaPrimary)}<span class="sr-only"> ${esc(t.a11y.newTab)}</span>
+          ${icon("star", "size-4")}${esc(t.hero.ctaPrimary)}<span class="sr-only"> ${esc(t.a11y.newTab)}</span>
         </a>
         <a href="#install" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-5 text-sm font-semibold text-fg transition-colors hover:bg-surface-2">
           ${icon("terminal", "size-4")}${esc(t.hero.ctaSecondary)}

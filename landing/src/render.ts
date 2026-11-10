@@ -2,20 +2,20 @@
  * Build-time renderer: produces the full, static HTML of each language version.
  * Runs in Node (via the Vite plugin in vite.config.ts), never in the browser.
  */
-import { dictionaries, makeContext, PATHS, type Ctx, type Lang } from "./context";
-import { esc } from "./lib/html";
-import { Architecture } from "./sections/Architecture";
-import { FAQ } from "./sections/FAQ";
-import { Features } from "./sections/Features";
-import { Footer } from "./sections/Footer";
-import { Header, logo } from "./sections/Header";
-import { Hero } from "./sections/Hero";
-import { HowItWorks } from "./sections/HowItWorks";
-import { Install } from "./sections/Install";
-import { OpenSource } from "./sections/OpenSource";
-import { Roadmap } from "./sections/Roadmap";
-import { Security } from "./sections/Security";
-import { StatusBanner } from "./sections/StatusBanner";
+import { dictionaries, makeContext, PATHS, type Ctx, type Lang } from "./context.ts";
+import { esc } from "./lib/html.ts";
+import { Architecture } from "./sections/Architecture.ts";
+import { FAQ } from "./sections/FAQ.ts";
+import { Features } from "./sections/Features.ts";
+import { Footer } from "./sections/Footer.ts";
+import { Header, logo } from "./sections/Header.ts";
+import { Hero } from "./sections/Hero.ts";
+import { HowItWorks } from "./sections/HowItWorks.ts";
+import { Install } from "./sections/Install.ts";
+import { OpenSource } from "./sections/OpenSource.ts";
+import { Roadmap } from "./sections/Roadmap.ts";
+import { Security } from "./sections/Security.ts";
+import { StatusBanner } from "./sections/StatusBanner.ts";
 
 const OG_LOCALE: Record<Lang, string> = { fr: "fr_FR", en: "en_US" };
 
