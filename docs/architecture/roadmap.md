@@ -5,14 +5,15 @@ left. A feature is "done" only when it actually works end to end. The public
 roadmap on asitechsolution.cloud is driven by `landing/src/data/roadmap.json`;
 keep both in sync.
 
-## Phase 0 — Public website · *in progress*
+## Phase 0 — Public website · *done*
 
 - [x] `landing/`: static, pre-rendered, bilingual FR/EN site (Vite + TS + Tailwind)
 - [x] Dockerfile (unprivileged Nginx), Compose file bound to 127.0.0.1
 - [x] `deploy-landing.sh` (candidate health check, rollback, safe vhost handling)
 - [x] Host vhost template, deployment documentation, CI workflow with Lighthouse budget
-- [ ] Confirm the public repository URL and mailboxes (`site.json`)
-- [ ] First deployment on the ASITECH server; Lighthouse ≥ 90 verified in production
+- [x] Repository URL confirmed (`ASITECH-COMPANY/asitech-ops`)
+- [x] Deployed on the ASITECH server (2026-11-10): HTTPS (Let's Encrypt), www and HTTP redirects, security headers, hardened container on 127.0.0.1, redeploy and rollback verified on the server
+- [ ] Confirm the `contact@` and `security@asitechsolution.cloud` mailboxes (`site.json`)
 
 ## Phase 1 — Foundation · *in progress*
 

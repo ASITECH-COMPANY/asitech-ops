@@ -267,7 +267,7 @@ step "Deploying $IMAGE_NAME:$TAG"
 read_state
 RUNNING="$(running_tag)"
 container_healthy() {
-  [[ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CONTAINER_NAME" 2>/dev/null)" =~ ^(healthy|running)$ ]] &&
+  [[ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CONTAINER_NAME" 2>/dev/null)" =~ ^(healthy|starting|running)$ ]] &&
     wait_healthy "http://127.0.0.1:$LANDING_PORT"
 }
 

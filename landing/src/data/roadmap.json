@@ -3,7 +3,7 @@
   "phases": [
     {
       "id": "phase-0",
-      "status": "in-progress",
+      "status": "done",
       "title": { "fr": "Phase 0 — Site public", "en": "Phase 0 — Public website" },
       "items": {
         "fr": ["Site asitechsolution.cloud bilingue", "Image Docker et déploiement sans interruption des services existants"],
