@@ -5,8 +5,8 @@ Apache-2.0, like the rest of the repository.
 
 * **No framework runtime.** Pages are pre-rendered at build time by a small Vite
   plugin (`vite.config.ts` → `src/render.ts` → `src/sections/*.ts`). The only
-  JavaScript shipped is `src/main.ts` (theme toggle, mobile menu, copy button)
-  and `public/theme-init.js` (applies the theme before first paint).
+  JavaScript shipped is the deferred `src/main.ts` (theme toggle, mobile menu,
+  copy button). Dark mode follows the OS in pure CSS; nothing blocks rendering.
 * **Content is data:** text in `src/i18n/fr.json` / `en.json`, project status
   and links in `src/data/site.json`, roadmap in `src/data/roadmap.json`.
 * **No tracking, no cookies, no third-party requests.** System font stack, inline

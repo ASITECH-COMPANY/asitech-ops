@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(.light), :root:not(.light) *) {
+      @slot;
+    }
+  }
+}
 
 /* Brand: primary #1D4ED8, secondary #F97316. Text-safe variants keep WCAG AA contrast. */
 :root {
@@ -23,7 +32,9 @@
   color-scheme: light;
 }
 
-.dark {
+/* Dark theme: follows the OS by default (pure CSS, no render-blocking script);
+   a manual choice adds .dark or .light on <html> (see main.ts). */
+:root.dark {
   --bg: #0b0f17;
   --surface: #111827;
   --surface-2: #161f30;
@@ -41,6 +52,28 @@
   --success-soft: #11291b;
   --grid-line: rgb(255 255 255 / 0.04);
   color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --bg: #0b0f17;
+    --surface: #111827;
+    --surface-2: #161f30;
+    --line: #243049;
+    --fg: #e8ebf1;
+    --muted: #a3adbf;
+    --primary: #7aa2f7;
+    --primary-hover: #93b4f8;
+    --primary-soft: #18264a;
+    --primary-fg: #0b0f17;
+    --accent: #fb923c;
+    --accent-strong: #fdba74;
+    --accent-soft: #2f1d0f;
+    --success: #4ade80;
+    --success-soft: #11291b;
+    --grid-line: rgb(255 255 255 / 0.04);
+    color-scheme: dark;
+  }
 }
 
 @theme inline {

@@ -22,16 +22,28 @@ function storeTheme(value: string): void {
   }
 }
 
+function prefersDark(): boolean {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+/**
+ * The OS preference is applied by CSS alone. A manual choice is stored and
+ * expressed as an explicit .dark or .light class on <html>.
+ */
+function applyTheme(choice: string | null): void {
+  const root = document.documentElement;
+  root.classList.toggle("dark", choice === "dark");
+  root.classList.toggle("light", choice === "light");
+}
+
 function setupTheme(): void {
   const root = document.documentElement;
+  applyTheme(storedTheme());
   document.querySelector<HTMLButtonElement>("[data-theme-toggle]")?.addEventListener("click", () => {
-    const dark = !root.classList.contains("dark");
-    root.classList.toggle("dark", dark);
-    storeTheme(dark ? "dark" : "light");
-  });
-  // Follow the OS setting until the visitor makes an explicit choice.
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
-    if (!storedTheme()) root.classList.toggle("dark", event.matches);
+    const isDark = root.classList.contains("dark") || (!root.classList.contains("light") && prefersDark());
+    const next = isDark ? "light" : "dark";
+    applyTheme(next);
+    storeTheme(next);
   });
 }
 

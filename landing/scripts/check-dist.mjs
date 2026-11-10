@@ -32,6 +32,10 @@ for (const [lang, page] of Object.entries(pages)) {
   }
   if (/lorem ipsum/i.test(html)) fail(`${page}: placeholder text (lorem ipsum) found`);
   if (html.includes("<!--prerender:")) fail(`${page}: pre-render placeholder not replaced`);
+  // Nothing may block the first render: the only script must be the deferred module.
+  for (const match of html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*>/g)) {
+    if (!/type="module"/.test(match[0])) fail(`${page}: render-blocking script ${match[1]}`);
+  }
   if (/\sstyle="/.test(html)) fail(`${page}: inline style attribute (blocked by the CSP)`);
   if (/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>/.test(html)) fail(`${page}: inline script (blocked by the CSP)`);
 
@@ -58,7 +62,7 @@ for (const [lang, page] of Object.entries(pages)) {
   if (kb > MAX_INITIAL_KB) fail(`${page}: initial weight ${kb.toFixed(1)} KB exceeds ${MAX_INITIAL_KB} KB`);
 }
 
-for (const required of ["404.html", "robots.txt", "sitemap.xml", "og-image.png", "favicon.svg", "theme-init.js"]) {
+for (const required of ["404.html", "robots.txt", "sitemap.xml", "og-image.png", "favicon.svg"]) {
   if (!files.some((file) => relative(DIST, file) === required)) fail(`dist/${required} missing`);
 }
 
