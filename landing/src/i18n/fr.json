@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "title": "ASITECH OPS — Déploiement et gestion multi-serveurs Open Source",
+    "description": "Plateforme Open Source (Apache 2.0) pour déployer, gérer et superviser vos applications sur tous vos serveurs Linux depuis un seul tableau de bord. Maintenue par ASITECH SOLUTION.",
+    "ogAlt": "ASITECH OPS — déployez et gérez vos applications sur tous vos serveurs Linux"
+  },
+  "a11y": {
+    "skip": "Aller au contenu",
+    "menu": "Menu",
+    "closeMenu": "Fermer le menu",
+    "theme": "Changer de thème (clair / sombre)",
+    "language": "Langue",
+    "home": "ASITECH OPS — accueil",
+    "newTab": "(nouvel onglet)"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "how": "Fonctionnement",
+    "security": "Sécurité",
+    "install": "Installation",
+    "docs": "Docs",
+    "github": "GitHub",
+    "switchTo": "English",
+    "switchToShort": "EN"
+  },
+  "hero": {
+    "eyebrow": "Open Source · Apache 2.0",
+    "title": "Déployez et gérez vos applications sur tous vos serveurs Linux, depuis un seul tableau de bord.",
+    "subtitle": "ASITECH OPS est une plateforme Open Source de déploiement et de gestion d'infrastructure : un Control Plane central, des agents légers sur vos serveurs, et Docker au cœur. Publiée sous licence Apache 2.0 par ASITECH SOLUTION.",
+    "ctaPrimary": "Voir sur GitHub",
+    "ctaSecondary": "Guide d'installation",
+    "illustrationLabel": "Illustration",
+    "illustrationCaption": "Illustration de l'interface prévue — pas une capture d'écran. Les vraies captures seront publiées avec les premières versions.",
+    "illustration": {
+      "overview": "Vue d'ensemble",
+      "servers": "Serveurs",
+      "apps": "Applications",
+      "deployments": "Déploiements",
+      "online": "En ligne",
+      "healthy": "Sain",
+      "deploying": "Déploiement",
+      "activity": "Activité"
+    }
+  },
+  "status": {
+    "label": "Statut du projet",
+    "early-development": "Développement précoce — pas encore prêt pour la production.",
+    "early-developmentDetail": "Les fondations sont en cours de construction. Suivez la feuille de route ou contribuez sur GitHub.",
+    "beta": "Version bêta — testez-la, signalez les problèmes.",
+    "betaDetail": "Les fonctionnalités principales sont disponibles ; des changements incompatibles restent possibles.",
+    "stable": "Version stable disponible.",
+    "stableDetail": "Consultez les notes de version avant toute mise à jour.",
+    "roadmapLink": "Voir la feuille de route"
+  },
+  "features": {
+    "title": "Tout ce qu'il faut pour exploiter vos applications",
+    "subtitle": "Les modules prévus pour ASITECH OPS. Leur disponibilité est indiquée dans la feuille de route.",
+    "items": {
+      "multiServer": { "title": "Multi-serveurs", "text": "Pilotez un VPS ou un parc entier de serveurs Linux depuis un même tableau de bord." },
+      "git": { "title": "Déploiements Git", "text": "Déployez une branche d'un dépôt Git, avec commandes de build et variables d'environnement." },
+      "docker": { "title": "Docker & Compose", "text": "Construction d'images avec BuildKit et déploiement de piles Docker Compose." },
+      "logs": { "title": "Logs en temps réel", "text": "Suivez les logs de build et de conteneurs en direct, sans ouvrir de session SSH." },
+      "monitoring": { "title": "Supervision", "text": "CPU, mémoire, disque, réseau et santé des applications, avec historique." },
+      "domains": { "title": "Domaines & SSL", "text": "Domaines, sous-domaines et certificats HTTPS automatiques, sans conflit avec votre proxy." },
+      "rollback": { "title": "Retour arrière", "text": "La version en place reste active tant que la nouvelle n'a pas passé ses contrôles de santé." },
+      "teams": { "title": "Équipes & permissions", "text": "Organisations, rôles, invitations et journal d'audit pour chaque action sensible." }
+    }
+  },
+  "how": {
+    "title": "Comment ça marche",
+    "subtitle": "Trois étapes, de votre premier VPS à votre premier déploiement.",
+    "steps": [
+      { "title": "Installez le Control Plane", "text": "Un installateur vérifié (somme SHA-256) déploie le tableau de bord, l'API, PostgreSQL et Redis avec Docker Compose, sans toucher à vos services existants." },
+      { "title": "Connectez vos serveurs", "text": "Installez l'agent sur chaque serveur Linux. Il s'enregistre avec un identifiant unique et révocable, puis ouvre une connexion sortante chiffrée." },
+      { "title": "Déployez depuis Git", "text": "Choisissez un dépôt et une branche : ASITECH OPS construit l'image, la déploie, vérifie sa santé et conserve l'historique pour revenir en arrière." }
+    ]
+  },
+  "architecture": {
+    "title": "Une architecture pensée pour la sécurité",
+    "subtitle": "Un Control Plane central et des agents distants. Les agents se connectent vers le Control Plane : aucun port de gestion n'est ouvert sur vos serveurs.",
+    "controlPlane": "Control Plane",
+    "controlPlaneItems": ["Tableau de bord & API", "PostgreSQL · Redis", "Tâches & orchestration"],
+    "server": "Serveur",
+    "agent": "Agent",
+    "docker": "Docker",
+    "link": "TLS sortant",
+    "diagramTitle": "Schéma d'architecture d'ASITECH OPS",
+    "diagramDesc": "Le Control Plane central reçoit des connexions TLS sortantes initiées par l'agent installé sur chaque serveur Linux. Chaque agent pilote Docker localement.",
+    "notes": [
+      "Les agents initient la connexion (WebSocket sur TLS) : pas d'API de gestion publique sur les serveurs.",
+      "Chaque tâche est validée, horodatée et limitée dans le temps ; aucune commande shell arbitraire.",
+      "Le site public est statique et totalement isolé de la plateforme."
+    ]
+  },
+  "security": {
+    "title": "Sécurité, sans promesses vagues",
+    "subtitle": "Les principes appliqués dès la conception. Le modèle de menace complet est documenté dans le dépôt.",
+    "items": [
+      { "title": "TLS partout", "text": "Communications chiffrées entre agents, Control Plane et navigateur." },
+      { "title": "Identifiants d'agent révocables", "text": "Chaque serveur a une identité unique, révocable à tout moment." },
+      { "title": "Pas d'exécution shell arbitraire", "text": "L'API n'accepte que des opérations définies et validées." },
+      { "title": "Journal d'audit", "text": "Les actions sensibles sont enregistrées et non modifiables." },
+      { "title": "Isolation des organisations", "text": "Une organisation ne peut jamais accéder aux ressources d'une autre." },
+      { "title": "Risque du socket Docker documenté", "text": "L'accès au socket Docker équivaut à root : il est traité comme tel et encadré." }
+    ],
+    "policy": "Lire la politique de sécurité",
+    "report": "Signaler une vulnérabilité en privé : {email}"
+  },
+  "install": {
+    "title": "Installation",
+    "subtitle": "Sur un serveur Ubuntu compatible : téléchargez l'installateur, vérifiez sa somme SHA-256, puis exécutez-le.",
+    "codeLabel": "Commandes d'installation",
+    "copy": "Copier",
+    "copied": "Copié",
+    "notLive": "Ce point de distribution n'est pas encore en ligne : l'installateur VPS arrive en Phase 5. N'exécutez jamais un script d'installation non vérifié en production.",
+    "devGuide": "En attendant, lancer l'environnement de développement",
+    "requirements": "Prévu : Ubuntu LTS, 2 vCPU, 4 Go de RAM, Docker Engine. Les ports 80/443 déjà utilisés sont détectés : intégration à votre proxy existant possible."
+  },
+  "openSource": {
+    "title": "Open Source, pour de vrai",
+    "subtitle": "Tout le code — plateforme, agent, installateur et ce site — est publié sous licence Apache 2.0. Les contributions sont les bienvenues.",
+    "license": "Licence Apache 2.0",
+    "links": {
+      "repo": "Dépôt GitHub",
+      "contributing": "Guide de contribution",
+      "issues": "Tickets et suggestions",
+      "roadmap": "Feuille de route"
+    },
+    "invite": "Développeurs, DevOps, rédacteurs, traducteurs : chaque contribution compte."
+  },
+  "roadmap": {
+    "title": "Feuille de route",
+    "subtitle": "Le projet avance phase par phase. Une fonctionnalité n'est marquée « terminée » que lorsqu'elle fonctionne réellement.",
+    "status": { "planned": "Prévu", "in-progress": "En cours", "done": "Terminé" }
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "items": [
+      { "q": "ASITECH OPS est-il gratuit ?", "a": "Oui. Le code est Open Source sous licence Apache 2.0 : vous pouvez l'utiliser, le modifier et le redistribuer, y compris à des fins commerciales, en respectant la licence." },
+      { "q": "Quels systèmes sont pris en charge ?", "a": "Le Control Plane et l'agent ciblent les serveurs Linux, en priorité Ubuntu LTS avec Docker Engine. La liste exacte sera publiée avec l'installateur." },
+      { "q": "Puis-je garder mon Nginx existant ?", "a": "Oui. L'installateur ne désactive jamais un proxy existant : si les ports 80/443 sont occupés, il propose une intégration à votre proxy, des ports dédiés ou une installation sur un VPS dédié." },
+      { "q": "Est-ce prêt pour la production ?", "a": "Pas encore. Le projet est en développement précoce ; ce site indiquera clairement quand une version stable sera disponible." },
+      { "q": "Comment signaler une vulnérabilité ?", "a": "En privé, par e-mail à {securityEmail}, et non dans un ticket public. La procédure est décrite dans SECURITY.md." },
+      { "q": "Qui maintient le projet ?", "a": "ASITECH SOLUTION, entreprise du Bénin dirigée par Augustin Sandé Idohou, avec les contributions de la communauté." }
+    ]
+  },
+  "footer": {
+    "tagline": "From Benin to Africa.",
+    "madeIn": "Fabriqué au Bénin",
+    "license": "Licence Apache 2.0",
+    "company": "ASITECH SOLUTION",
+    "contact": "Contact",
+    "rights": "© {year} ASITECH SOLUTION. Code publié sous licence Apache 2.0."
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "text": "Cette page n'existe pas.",
+    "home": "Retour à l'accueil"
+  }
+}

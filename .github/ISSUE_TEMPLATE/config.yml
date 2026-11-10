@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private)
+    url: https://asitechsolution.cloud/#security
+    about: Please follow SECURITY.md. Never open a public issue for vulnerabilities.

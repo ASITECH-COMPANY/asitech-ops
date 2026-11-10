@@ -1,0 +1,59 @@
+{
+  "statuses": ["planned", "in-progress", "done"],
+  "phases": [
+    {
+      "id": "phase-0",
+      "status": "in-progress",
+      "title": { "fr": "Phase 0 — Site public", "en": "Phase 0 — Public website" },
+      "items": {
+        "fr": ["Site asitechsolution.cloud bilingue", "Image Docker et déploiement sans interruption des services existants"],
+        "en": ["Bilingual asitechsolution.cloud website", "Docker image and deployment that leaves existing services untouched"]
+      }
+    },
+    {
+      "id": "phase-1",
+      "status": "in-progress",
+      "title": { "fr": "Phase 1 — Fondations", "en": "Phase 1 — Foundation" },
+      "items": {
+        "fr": ["Backend Django et API documentée", "Authentification, organisations, rôles et journal d'audit", "Tableau de bord React"],
+        "en": ["Django backend and documented API", "Authentication, organizations, roles and audit log", "React dashboard"]
+      }
+    },
+    {
+      "id": "phase-2",
+      "status": "planned",
+      "title": { "fr": "Phase 2 — Agent serveur", "en": "Phase 2 — Server agent" },
+      "items": {
+        "fr": ["Enregistrement sécurisé des serveurs", "Connexion sortante authentifiée", "Métriques et état en ligne / hors ligne"],
+        "en": ["Secure server registration", "Authenticated outbound connection", "Metrics and online / offline status"]
+      }
+    },
+    {
+      "id": "phase-3",
+      "status": "planned",
+      "title": { "fr": "Phase 3 — Moteur de déploiement", "en": "Phase 3 — Deployment engine" },
+      "items": {
+        "fr": ["Déploiements Git, Dockerfile et Compose", "Logs de build, historique et contrôles de santé", "Retour arrière vers la dernière version saine"],
+        "en": ["Git, Dockerfile and Compose deployments", "Build logs, history and health checks", "Rollback to the last healthy release"]
+      }
+    },
+    {
+      "id": "phase-4",
+      "status": "planned",
+      "title": { "fr": "Phase 4 — Gestion de l'infrastructure", "en": "Phase 4 — Infrastructure management" },
+      "items": {
+        "fr": ["Conteneurs, images, volumes et réseaux", "Logs en temps réel", "Supervision et historique des métriques"],
+        "en": ["Containers, images, volumes and networks", "Real-time logs", "Monitoring and metric history"]
+      }
+    },
+    {
+      "id": "phase-5",
+      "status": "planned",
+      "title": { "fr": "Phase 5 — Prêt pour la production", "en": "Phase 5 — Production readiness" },
+      "items": {
+        "fr": ["Domaines et certificats SSL", "Sauvegardes et restauration", "Installateur VPS, mises à jour et durcissement"],
+        "en": ["Domains and SSL certificates", "Backups and restore", "VPS installer, upgrades and hardening"]
+      }
+    }
+  ]
+}

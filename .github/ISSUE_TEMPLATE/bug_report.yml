@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work as documented.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security vulnerabilities must not be reported here.** See SECURITY.md.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options: [Control Plane (backend), Dashboard (frontend), Agent, Installer, Website (landing), Documentation]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include the steps to reproduce.
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Docker version, browser...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Remove secrets, tokens, IP addresses and personal data before pasting.
+      render: shell

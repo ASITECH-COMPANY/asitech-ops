@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Source of public/og-image.png (1200x630). Regenerate with: npm run og-image -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; }
+  body {
+    font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #0b0f17;
+    color: #e8ebf1;
+    position: relative;
+    overflow: hidden;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .glow { position: absolute; width: 760px; height: 760px; right: -220px; top: -260px;
+          background: radial-gradient(closest-side, rgba(29,78,216,.55), transparent); }
+  .content { position: absolute; left: 80px; top: 80px; right: 80px; }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
+  .brand span { color: #7aa2f7; }
+  h1 { margin: 64px 0 0; font-size: 60px; line-height: 1.12; font-weight: 700; letter-spacing: -1.5px; max-width: 980px; }
+  .bar { width: 120px; height: 8px; border-radius: 4px; background: #F97316; margin-top: 40px; }
+  .meta { position: absolute; left: 80px; bottom: 64px; font-size: 26px; color: #a3adbf; }
+  .meta b { color: #e8ebf1; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <div class="content">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="64" height="64"><rect width="32" height="32" rx="7" fill="#1D4ED8"/><path d="M9 22.5 15.2 8.8a.9.9 0 0 1 1.6 0L23 22.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8 17.6h8.4" stroke="#F97316" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <div>ASITECH <span>OPS</span></div>
+    </div>
+    <h1>Deploy and manage your applications on all your Linux servers.</h1>
+    <div class="bar"></div>
+  </div>
+  <div class="meta"><b>Open source · Apache 2.0</b> &nbsp;·&nbsp; asitechsolution.cloud &nbsp;·&nbsp; ASITECH SOLUTION</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# ASITECH OPS landing page. Deployed by deployment/scripts/deploy-landing.sh.
+# The container is only reachable from the host (127.0.0.1); the host reverse
+# proxy (Nginx) terminates TLS and exposes it publicly.
+name: asitech-landing
+
+services:
+  landing:
+    image: asitech-landing:${LANDING_IMAGE_TAG:-latest}
+    build:
+      context: .
+    container_name: asitech-landing
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${LANDING_PORT:-8088}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /var/cache/nginx:size=16m,uid=101,gid=101
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,11 @@
+ASITECH OPS
+Copyright 2026 ASITECH SOLUTION (https://asitechsolution.com)
+
+This product is developed and maintained by ASITECH SOLUTION,
+Augustin Sandé Idohou, Benin.
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes third-party open source software, each distributed
+under its own license. Dependency manifests (backend/requirements/*.txt,
+frontend/package-lock.json, landing/package-lock.json) list them.

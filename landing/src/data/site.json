@@ -1,0 +1,12 @@
+{
+  "siteUrl": "https://asitechsolution.cloud",
+  "repoUrl": "https://github.com/ASITECH-COMPANY/asitech-ops",
+  "defaultBranch": "main",
+  "companyUrl": "https://asitechsolution.com",
+  "contactEmail": "contact@asitechsolution.cloud",
+  "securityEmail": "security@asitechsolution.cloud",
+  "installBaseUrl": "https://get.asitechsolution.cloud",
+  "installEndpointLive": false,
+  "status": "early-development",
+  "copyrightYear": 2026
+}
