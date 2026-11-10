@@ -1,0 +1,13 @@
+# gitleaks configuration (loaded automatically from the repository root).
+title = "ASITECH OPS"
+
+[extend]
+useDefault = true
+
+# Fake credentials used only by backend test fixtures. Matching is narrow on
+# purpose: both the path and the exact value must match.
+[[allowlists]]
+description = "Backend test fixture passwords (not secrets)"
+condition = "AND"
+paths = ['''^backend/tests/.*\.py$''']
+regexes = ['''^correct-horse-battery-staple-42$''', '''^a-Strong-passphrase-2026$''']

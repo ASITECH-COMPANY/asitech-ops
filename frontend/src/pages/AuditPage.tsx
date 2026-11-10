@@ -62,7 +62,7 @@ export function AuditPage() {
               setAction(e.target.value);
               setPage(1);
             }}
-            className="w-auto min-w-56"
+            className="max-w-xs"
           >
             <option value="">{t("audit.allActions")}</option>
             {ACTIONS.map((value) => {
