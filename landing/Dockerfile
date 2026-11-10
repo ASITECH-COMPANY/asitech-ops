@@ -2,7 +2,7 @@
 # ASITECH OPS landing page (asitechsolution.cloud): static build served by unprivileged Nginx.
 
 # --- 1. Build -------------------------------------------------------------------------
-FROM node:24.22.2-alpine3.23 AS build
+FROM node:26.13.0-alpine3.23 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
