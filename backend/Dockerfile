@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # ASITECH OPS Control Plane (Django). Targets: "dev" (hot reload) and "prod".
 
-FROM python:3.13.18-slim-trixie AS base
+FROM python:3.15.0-slim-trixie AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
