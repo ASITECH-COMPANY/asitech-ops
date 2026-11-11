@@ -11,7 +11,7 @@ anyio==4.16.0 \
 argon2-cffi==25.1.0 \
     --hash=sha256:694ae5cc8a42f4c4e2bf2ca0e64e51e23a040c6a517a85074683d3959e1346c1 \
     --hash=sha256:fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741
-    # via -r requirements/base.in
+    # via -r base.in
 argon2-cffi-bindings==26.1.0 \
     --hash=sha256:061a6919145bbf282ebf1f9c59d3135d4833c25313c8595c0d68cf7712ddfce2 \
     --hash=sha256:0cc40f7b4050bb93eb67de95d2d759322fc7ce4930b9d645581ecf4913ec651e \
@@ -72,10 +72,10 @@ billiard==4.3.2 \
     --hash=sha256:37735a7b4117aafa73532b3b493db4c02fb85c0e69d5f3447f113fd30ff27872 \
     --hash=sha256:9eb83c99b1cf7acb1fed86c1dfd477157000a1a2c0108005c1e5837b55d2acba
     # via celery
-celery==5.7.0 \
+celery[redis]==5.7.0 \
     --hash=sha256:18310a9c919f9029e4735367484d93e6a25cdfd30afdc474622cc263d9b35f6e \
     --hash=sha256:6a5dfcf6662287204f009a02002b9e66c83d4105e47ebabdc7079108772fc6f0
-    # via -r requirements/base.in
+    # via -r base.in
 cffi==2.1.1 \
     --hash=sha256:046bfc24911b37851ee1b51aab8bffe713d89c68c6a057b09484ce9fd5f69b4e \
     --hash=sha256:06c72bb76605a4b0cd0aad6930b69d4baf7dd5d806cfc409b824191099700e66 \
@@ -184,12 +184,12 @@ channels==4.3.2 \
     --hash=sha256:f2bb6bfb73ad7fb4705041d07613c7b4e69528f01ef8cb9fb6c21d9295f15667 \
     --hash=sha256:fef47e9055a603900cf16cef85f050d522d9ac4b3daccf24835bd9580705c176
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   channels-redis
 channels-redis==4.3.0 \
     --hash=sha256:48f3e902ae2d5fef7080215524f3b4a1d3cea4e304150678f867a1a822c0d9f5 \
     --hash=sha256:740ee7b54f0e28cf2264a940a24453d3f00526a96931f911fcb69228ef245dd2
-    # via -r requirements/base.in
+    # via -r base.in
 click==8.5.1 \
     --hash=sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37 \
     --hash=sha256:9bbfada76703fd1d784b83eea012e3e8c6a001a876543ef104fa56aaaeb072b4
@@ -271,12 +271,12 @@ cryptography==50.0.2 \
     --hash=sha256:f9f6143a8c75945eb960d9eb98905a441394abfa24afaae239d514ffb2586480 \
     --hash=sha256:fa8f5efb344d6908a1ce62f4a24e2e5780f825d6f53f5f50ec5ffacac72936cb \
     --hash=sha256:fdd28f912fccfec1846a94e2e1e8f9b0012f557f0c46fe4f3eb0d7a87afcf90b
-    # via -r requirements/base.in
-django==5.2.19 \
-    --hash=sha256:5965d974a5218a2b68a11dd1276434707f23886525c23f0598eccedaf4f4ca00 \
-    --hash=sha256:ad03d8abc51dbff95ebf34b27123cf0c26a3b62db7ba0cd520783686362533d1
+    # via -r base.in
+django==6.1.3 \
+    --hash=sha256:a0530e3fdac55d34ccc5893c36f6c57d7a7083064f3d414537e51473648b3290 \
+    --hash=sha256:b5d2d9e35295065d13b1927b3f19a59bd119f737aa6299def14ccca1ae3c8c0d
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   channels
     #   djangorestframework
     #   drf-spectacular
@@ -285,16 +285,16 @@ djangorestframework==3.18.3 \
     --hash=sha256:446a9b352e7eff630421ab3f2328bd2401b109a9470afa4a31189994911ed030 \
     --hash=sha256:8544bb674846731b1e3c9b309236ee1dc412905a0aa725be2ec193ca950a7d12
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   drf-spectacular
 drf-spectacular==0.30.0 \
     --hash=sha256:006cf5921ebe20a9bd24f7c846261ebbf78780be5961b0d6e87afaa82afd62ff \
     --hash=sha256:53e79e7ba00e240441b63c32273754a5368e4c2ab44a19f2595277cc1cd559c9
-    # via -r requirements/base.in
+    # via -r base.in
 drf-spectacular-sidecar==2026.10.1 \
     --hash=sha256:ec8d20b2594e8a10ebf22e5bab62ec313c7cf8793753a050290b209e16e81c9c \
     --hash=sha256:fe1d005d8ac9b5d0472f2fe5deeb2e7d6dcffaa24118044f22578b4b8c4b31f2
-    # via -r requirements/base.in
+    # via -r base.in
 h11==0.16.0 \
     --hash=sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1 \
     --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
@@ -435,7 +435,7 @@ jsonschema-specifications==2025.9.1 \
     --hash=sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe \
     --hash=sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d
     # via jsonschema
-kombu==5.7.0 \
+kombu[redis]==5.7.0 \
     --hash=sha256:31e62fdfd2381caa3422f8e02b84a491d9a2180ddda74507b57f4cb1e1c2c2c9 \
     --hash=sha256:dede73bff4c89175be382c4203d2f167cf7017c384396ec75c36a1b5678f1587
     # via celery
@@ -540,10 +540,10 @@ prompt-toolkit==3.0.53 \
     --hash=sha256:01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2 \
     --hash=sha256:9ec8a0ad96d5c56148b3f914aa79c1564c3fde5d2e6b876e7bc327e353cf8fa6
     # via click-repl
-psycopg==3.3.8 \
+psycopg[binary]==3.3.8 \
     --hash=sha256:86c135a9a6f5e98404975c5787e620bf436a7807e088baebd1b20fa48d3b4b4f \
     --hash=sha256:ca50af6072ba9ea6866f33021975230c2555d7bfdb9d8f94ca3af5c3d1bf2167
-    # via -r requirements/base.in
+    # via -r base.in
 psycopg-binary==3.3.8 \
     --hash=sha256:00c226f718901ce022bcee2e0779dc2f0a6d8bcedd5a3818e21ff25564efaa97 \
     --hash=sha256:0332e83c2e78b1c8c00c1095688f9b332bdde9d5e9d61b8ce1cdcaf716a19b9e \
@@ -705,7 +705,7 @@ redis==8.1.0 \
     --hash=sha256:6e1a19beef9225c83efd689c7e6b7da2d5215b1f42cd13b7fc3714d0a09c7b25 \
     --hash=sha256:a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   channels-redis
     #   kombu
 referencing==0.37.0 \
@@ -857,9 +857,7 @@ sqlparse==0.6.1 \
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
     --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5
-    # via
-    #   anyio
-    #   click-repl
+    # via click-repl
 tzlocal==5.4.5 \
     --hash=sha256:ba976898bad27945178c9ca25c222c19e322b30c10342b9f40b46714f70d2d5f \
     --hash=sha256:ecab534f6d65d9deb4c4ea52c121ab6dd5958e9b878e71dcb102578269752454
@@ -868,10 +866,10 @@ uritemplate==4.2.0 \
     --hash=sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e \
     --hash=sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686
     # via drf-spectacular
-uvicorn==0.54.0 \
+uvicorn[standard]==0.54.0 \
     --hash=sha256:505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf \
     --hash=sha256:a2e33cbfaa0306f8e6b0c13e0cb89d7d7a2da3e62b90c66e18c33d9807b28620
-    # via -r requirements/base.in
+    # via -r base.in
 uvloop==0.23.0 \
     --hash=sha256:0305871ac712f54b62af73f943dbf21ae3ce80a44bc0f0151424484affa85645 \
     --hash=sha256:090865d8ce7a03986755a3ce711b7dd0d4b44eb14ab74368b717f3fad1180208 \
