@@ -19,7 +19,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^26.6.6",
-    "html-validate": "^11.21.0",
+    "html-validate": "^11.21.1",
     "lucide": "^1.70.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
